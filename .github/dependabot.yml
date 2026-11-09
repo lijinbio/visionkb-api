@@ -19,3 +19,8 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    ignore:
+      # The image stays on the tested Python line (CI matrix 3.12/3.13): only 3.13.x patch bumps.
+      # A Python minor upgrade is a deliberate change (CI matrix, wheels, release note).
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
