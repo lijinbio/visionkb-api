@@ -1,0 +1,3223 @@
+{
+ "agent_type": [
+  "automated_agent",
+  "computational_model",
+  "data_analysis_pipeline",
+  "image_processing_agent",
+  "manual_agent",
+  "manual_validation_of_automated_agent",
+  "not_provided",
+  "text_mining_agent"
+ ],
+ "biolink_version": "4.4.6",
+ "categories": {
+  "biolink:AccessibleDnaRegion": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:AccessibleDnaRegion",
+    "biolink:RegulatoryRegion",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Activity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Activity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:AdministrativeEntity": {
+   "abstract": true,
+   "ancestors": [
+    "biolink:AdministrativeEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Agent": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Agent",
+    "biolink:AdministrativeEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:AnatomicalEntity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:AnatomicalEntity",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Article": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Article",
+    "biolink:Publication",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Attribute": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Bacterium": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Bacterium",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Behavior": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Behavior",
+    "biolink:BiologicalProcess",
+    "biolink:BiologicalProcessOrActivity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:BehavioralExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:BehavioralExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:BehavioralFeature": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:BehavioralFeature",
+    "biolink:PhenotypicFeature",
+    "biolink:DiseaseOrPhenotypicFeature",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:BiologicalEntity": {
+   "abstract": true,
+   "ancestors": [
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:BiologicalProcess": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:BiologicalProcess",
+    "biolink:BiologicalProcessOrActivity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:BiologicalProcessOrActivity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:BiologicalProcessOrActivity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:BiologicalSex": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:BiologicalSex",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:BioticExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:BioticExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Book": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Book",
+    "biolink:Publication",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:BookChapter": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:BookChapter",
+    "biolink:Publication",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Case": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Case",
+    "biolink:IndividualOrganism",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Cell": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Cell",
+    "biolink:AnatomicalEntity",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:CellLine": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:CellLine",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:CellularComponent": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:CellularComponent",
+    "biolink:AnatomicalEntity",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:CellularOrganism": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:CellularOrganism",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ChemicalEntity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ChemicalExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ChemicalExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ChemicalMixture": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ChemicalMixture",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ChemicalRole": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ChemicalRole",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ChiSquaredAnalysisResult": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ChiSquaredAnalysisResult",
+    "biolink:StudyResult",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ClinicalAttribute": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ClinicalAttribute",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ClinicalCourse": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ClinicalCourse",
+    "biolink:ClinicalAttribute",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ClinicalEntity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ClinicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ClinicalFinding": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ClinicalFinding",
+    "biolink:PhenotypicFeature",
+    "biolink:DiseaseOrPhenotypicFeature",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ClinicalIntervention": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ClinicalIntervention",
+    "biolink:ClinicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ClinicalMeasurement": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ClinicalMeasurement",
+    "biolink:ClinicalAttribute",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ClinicalModifier": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ClinicalModifier",
+    "biolink:ClinicalAttribute",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ClinicalTrial": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ClinicalTrial",
+    "biolink:Study",
+    "biolink:Activity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:CodingSequence": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:CodingSequence",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Cohort": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Cohort",
+    "biolink:StudyPopulation",
+    "biolink:PopulationOfIndividualOrganisms",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:CommonDataElement": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:CommonDataElement",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ComplexChemicalExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ComplexChemicalExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ComplexMolecularMixture": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ComplexMolecularMixture",
+    "biolink:ChemicalMixture",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ConceptCountAnalysisResult": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ConceptCountAnalysisResult",
+    "biolink:StudyResult",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ConfidenceLevel": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ConfidenceLevel",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Dataset": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Dataset",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:DatasetDistribution": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:DatasetDistribution",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:DatasetSummary": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:DatasetSummary",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:DatasetVersion": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:DatasetVersion",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Device": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Device",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:DiagnosticAid": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:DiagnosticAid",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Disease": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Disease",
+    "biolink:DiseaseOrPhenotypicFeature",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:DiseaseOrPhenotypicFeature": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:DiseaseOrPhenotypicFeature",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:DiseaseOrPhenotypicFeatureExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:DiseaseOrPhenotypicFeatureExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Drug": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Drug",
+    "biolink:MolecularMixture",
+    "biolink:ChemicalMixture",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:DrugExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:DrugExposure",
+    "biolink:ChemicalExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:DrugLabel": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:DrugLabel",
+    "biolink:Publication",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:DrugToGeneInteractionExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:DrugToGeneInteractionExposure",
+    "biolink:DrugExposure",
+    "biolink:ChemicalExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:EnvironmentalExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:EnvironmentalExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:EnvironmentalFeature": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:EnvironmentalFeature",
+    "biolink:PlanetaryEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:EnvironmentalFoodContaminant": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:EnvironmentalFoodContaminant",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:EnvironmentalProcess": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:EnvironmentalProcess",
+    "biolink:PlanetaryEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Event": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Event",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Evidence": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Evidence",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:EvidenceType": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:EvidenceType",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Exon": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Exon",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ExposureEvent": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Food": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Food",
+    "biolink:ChemicalMixture",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:FoodAdditive": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:FoodAdditive",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Fungus": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Fungus",
+    "biolink:CellularOrganism",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Gene": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Gene",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:GeneFamily": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:GeneFamily",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:GeneticInheritance": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:GeneticInheritance",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Genome": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Genome",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:GenomicBackgroundExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:GenomicBackgroundExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Genotype": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Genotype",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:GenotypicSex": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:GenotypicSex",
+    "biolink:BiologicalSex",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:GeographicExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:GeographicExposure",
+    "biolink:EnvironmentalExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:GeographicLocation": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:GeographicLocation",
+    "biolink:PlanetaryEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:GeographicLocationAtTime": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:GeographicLocationAtTime",
+    "biolink:GeographicLocation",
+    "biolink:PlanetaryEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:GrossAnatomicalStructure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:GrossAnatomicalStructure",
+    "biolink:AnatomicalEntity",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Haplotype": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Haplotype",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Hospitalization": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Hospitalization",
+    "biolink:ClinicalIntervention",
+    "biolink:ClinicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Human": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Human",
+    "biolink:Mammal",
+    "biolink:CellularOrganism",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:IceesStudyResult": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:IceesStudyResult",
+    "biolink:StudyResult",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:IndividualOrganism": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:IndividualOrganism",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:InformationContentEntity": {
+   "abstract": true,
+   "ancestors": [
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Invertebrate": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Invertebrate",
+    "biolink:CellularOrganism",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:JournalArticle": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:JournalArticle",
+    "biolink:Article",
+    "biolink:Publication",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:LifeStage": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:LifeStage",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:LogOddsAnalysisResult": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:LogOddsAnalysisResult",
+    "biolink:StudyResult",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:MacromolecularComplex": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:MacromolecularComplex",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Mammal": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Mammal",
+    "biolink:CellularOrganism",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:MaterialSample": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:MaterialSample",
+    "biolink:PhysicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:MicroRNA": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:MicroRNA",
+    "biolink:NoncodingRNAProduct",
+    "biolink:RNAProduct",
+    "biolink:Transcript",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:MolecularActivity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:MolecularActivity",
+    "biolink:BiologicalProcessOrActivity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:MolecularEntity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:MolecularEntity",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:MolecularMixture": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:MolecularMixture",
+    "biolink:ChemicalMixture",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:NamedThing": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:NoncodingRNAProduct": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:NoncodingRNAProduct",
+    "biolink:RNAProduct",
+    "biolink:Transcript",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:NucleicAcidEntity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:NucleicAcidEntity",
+    "biolink:MolecularEntity",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:NucleicAcidSequenceMotif": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:NucleicAcidSequenceMotif",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:NucleosomeModification": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:NucleosomeModification",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ObservedExpectedFrequencyAnalysisResult": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ObservedExpectedFrequencyAnalysisResult",
+    "biolink:StudyResult",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Onset": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Onset",
+    "biolink:ClinicalCourse",
+    "biolink:ClinicalAttribute",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:OrganismAttribute": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:OrganismAttribute",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:OrganismTaxon": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:OrganismTaxon",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:OrganismalEntity": {
+   "abstract": true,
+   "ancestors": [
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Patent": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Patent",
+    "biolink:Publication",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PathologicalAnatomicalExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PathologicalAnatomicalExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PathologicalAnatomicalStructure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PathologicalAnatomicalStructure",
+    "biolink:AnatomicalEntity",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PathologicalProcess": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PathologicalProcess",
+    "biolink:BiologicalProcess",
+    "biolink:BiologicalProcessOrActivity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PathologicalProcessExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PathologicalProcessExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Pathway": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Pathway",
+    "biolink:BiologicalProcess",
+    "biolink:BiologicalProcessOrActivity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Phenomenon": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Phenomenon",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PhenotypicFeature": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PhenotypicFeature",
+    "biolink:DiseaseOrPhenotypicFeature",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PhenotypicQuality": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PhenotypicQuality",
+    "biolink:OrganismAttribute",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PhenotypicSex": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PhenotypicSex",
+    "biolink:BiologicalSex",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PhysicalEntity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PhysicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PhysiologicalProcess": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PhysiologicalProcess",
+    "biolink:BiologicalProcess",
+    "biolink:BiologicalProcessOrActivity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PlanetaryEntity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PlanetaryEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Plant": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Plant",
+    "biolink:CellularOrganism",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Polypeptide": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Polypeptide",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PopulationOfIndividualOrganisms": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PopulationOfIndividualOrganisms",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PosttranslationalModification": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PosttranslationalModification",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:PreprintPublication": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:PreprintPublication",
+    "biolink:Publication",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Procedure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Procedure",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ProcessedMaterial": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ProcessedMaterial",
+    "biolink:ChemicalMixture",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Protein": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Protein",
+    "biolink:Polypeptide",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ProteinDomain": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ProteinDomain",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ProteinFamily": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ProteinFamily",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ProteinIsoform": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ProteinIsoform",
+    "biolink:Protein",
+    "biolink:Polypeptide",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ProteinLigandAssayResult": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ProteinLigandAssayResult",
+    "biolink:StudyResult",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Publication": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Publication",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:RNAProduct": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:RNAProduct",
+    "biolink:Transcript",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:RNAProductIsoform": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:RNAProductIsoform",
+    "biolink:RNAProduct",
+    "biolink:Transcript",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:ReagentTargetedGene": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:ReagentTargetedGene",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:RegulatoryRegion": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:RegulatoryRegion",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:RelativeFrequencyAnalysisResult": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:RelativeFrequencyAnalysisResult",
+    "biolink:StudyResult",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:RetrievalSource": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:RetrievalSource",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:SequenceVariant": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:SequenceVariant",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Serial": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Serial",
+    "biolink:Publication",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:SeverityValue": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:SeverityValue",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:SiRNA": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:SiRNA",
+    "biolink:NoncodingRNAProduct",
+    "biolink:RNAProduct",
+    "biolink:Transcript",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:SmallMolecule": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:SmallMolecule",
+    "biolink:MolecularEntity",
+    "biolink:ChemicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Snv": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Snv",
+    "biolink:SequenceVariant",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:SocioeconomicAttribute": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:SocioeconomicAttribute",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:SocioeconomicExposure": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:SocioeconomicExposure",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Study": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Study",
+    "biolink:Activity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:StudyPopulation": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:StudyPopulation",
+    "biolink:PopulationOfIndividualOrganisms",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:StudyResult": {
+   "abstract": true,
+   "ancestors": [
+    "biolink:StudyResult",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:StudyVariable": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:StudyVariable",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:TextMiningStudyResult": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:TextMiningStudyResult",
+    "biolink:StudyResult",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Transcript": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Transcript",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:TranscriptionFactorBindingSite": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:TranscriptionFactorBindingSite",
+    "biolink:RegulatoryRegion",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Treatment": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Treatment",
+    "biolink:ExposureEvent",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Vertebrate": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Vertebrate",
+    "biolink:CellularOrganism",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Virus": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Virus",
+    "biolink:OrganismalEntity",
+    "biolink:BiologicalEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:WebPage": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:WebPage",
+    "biolink:Publication",
+    "biolink:InformationContentEntity",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  },
+  "biolink:Zygosity": {
+   "abstract": false,
+   "ancestors": [
+    "biolink:Zygosity",
+    "biolink:Attribute",
+    "biolink:NamedThing",
+    "biolink:Entity"
+   ],
+   "mixin": false
+  }
+ },
+ "knowledge_level": [
+  "knowledge_assertion",
+  "logical_entailment",
+  "not_provided",
+  "observation",
+  "prediction",
+  "statistical_association",
+  "text_co_occurrence"
+ ],
+ "predicates": {
+  "biolink:active_in": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:actively_involved_in": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:actively_involves": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:actively_involved_in",
+   "mixin": false
+  },
+  "biolink:acts_upstream_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:acts_upstream_of_negative_effect": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:acts_upstream_of_or_within": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:acts_upstream_of_or_within_negative_effect": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:acts_upstream_of_or_within_positive_effect": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:acts_upstream_of_positive_effect": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:adverse_event_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_adverse_event",
+   "mixin": false
+  },
+  "biolink:affected_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:affects",
+   "mixin": false
+  },
+  "biolink:affects": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:affects_likelihood_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:affects_sensitivity_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:ameliorates_condition": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:amount_or_activity_decreased_by": {
+   "abstract": false,
+   "deprecated": true,
+   "inverse": "biolink:decreases_amount_or_activity_of",
+   "mixin": false
+  },
+  "biolink:amount_or_activity_increased_by": {
+   "abstract": false,
+   "deprecated": true,
+   "inverse": "biolink:increases_amount_or_activity_of",
+   "mixin": false
+  },
+  "biolink:applied_to_treat": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:associated_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:associated_with_decreased_likelihood_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:associated_with_increased_likelihood_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:associated_with_likelihood_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:associated_with_resistance_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:associated_with_response_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:associated_with_sensitivity_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:author": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:beneficial_in_models_for": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:binds": {
+   "abstract": false,
+   "deprecated": true,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:biomarker_for": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:broad_match": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:can_be_carried_out_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:capable_of",
+   "mixin": false
+  },
+  "biolink:capable_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:catalyzes": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:caused_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:causes",
+   "mixin": false
+  },
+  "biolink:causes": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:chemically_similar_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:close_match": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:coexists_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:coexpressed_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:colocalizes_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:completed_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_completed",
+   "mixin": false
+  },
+  "biolink:composed_primarily_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:condition_ameliorated_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:ameliorates_condition",
+   "mixin": false
+  },
+  "biolink:condition_associated_with_gene": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:gene_associated_with_condition",
+   "mixin": false
+  },
+  "biolink:condition_exacerbated_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:exacerbates_condition",
+   "mixin": false
+  },
+  "biolink:condition_predisposed_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:predisposes_to_condition",
+   "mixin": false
+  },
+  "biolink:condition_promoted_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:promotes_condition",
+   "mixin": true
+  },
+  "biolink:consumed_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:consumes",
+   "mixin": false
+  },
+  "biolink:consumes": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:contains_process": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:occurs_in",
+   "mixin": false
+  },
+  "biolink:contraindicated_in": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:contributes_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:contribution_from": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:contributes_to",
+   "mixin": false
+  },
+  "biolink:contributor": {
+   "abstract": true,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:correlated_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:decreased_amount_in": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_decreased_amount",
+   "mixin": false
+  },
+  "biolink:decreased_likelihood_associated_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:associated_with_decreased_likelihood_of",
+   "mixin": false
+  },
+  "biolink:decreases_amount_or_activity_of": {
+   "abstract": false,
+   "deprecated": true,
+   "inverse": null,
+   "mixin": true
+  },
+  "biolink:decreases_sensitivity_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:derives_from": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:derives_into": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:derives_from",
+   "mixin": false
+  },
+  "biolink:develops_from": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:develops_into": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:develops_from",
+   "mixin": false
+  },
+  "biolink:diagnoses": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:directly_physically_interacts_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:disease_has_basis_in": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:disease_has_location": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:disrupted_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:disrupts",
+   "mixin": false
+  },
+  "biolink:disrupts": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:editor": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:enabled_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:enables",
+   "mixin": false
+  },
+  "biolink:enables": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:exacerbates_condition": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:exact_match": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:expressed_in": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:expresses": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:expressed_in",
+   "mixin": false
+  },
+  "biolink:food_component_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_food_component",
+   "mixin": false
+  },
+  "biolink:gene_associated_with_condition": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:gene_fusion_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:gene_product_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:genetic_association": {
+   "abstract": false,
+   "deprecated": true,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:genetic_neighborhood_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:genetically_associated_with": {
+   "abstract": false,
+   "deprecated": true,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:genetically_interacts_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_active_component": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:active_in",
+   "mixin": false
+  },
+  "biolink:has_active_ingredient": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_adverse_event": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_author": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:author",
+   "mixin": false
+  },
+  "biolink:has_biomarker": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:biomarker_for",
+   "mixin": false
+  },
+  "biolink:has_catalyst": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:catalyzes",
+   "mixin": false
+  },
+  "biolink:has_chemical_role": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:is_chemical_role_of",
+   "mixin": false
+  },
+  "biolink:has_completed": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_contraindication": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:contraindicated_in",
+   "mixin": false
+  },
+  "biolink:has_contributor": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:contributor",
+   "mixin": false
+  },
+  "biolink:has_decreased_amount": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_editor": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:editor",
+   "mixin": false
+  },
+  "biolink:has_excipient": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_food_component": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_frameshift_variant": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:is_frameshift_variant_of",
+   "mixin": false
+  },
+  "biolink:has_gene_product": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:gene_product_of",
+   "mixin": false
+  },
+  "biolink:has_increased_amount": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_input": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_manifestation": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:manifestation_of",
+   "mixin": false
+  },
+  "biolink:has_member": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_metabolite": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_missense_variant": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:is_missense_variant_of",
+   "mixin": false
+  },
+  "biolink:has_mode_of_inheritance": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_molecular_consequence": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_nearby_variant": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:is_nearby_variant_of",
+   "mixin": false
+  },
+  "biolink:has_negative_upstream_actor": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:acts_upstream_of_negative_effect",
+   "mixin": false
+  },
+  "biolink:has_negative_upstream_or_within_actor": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:acts_upstream_of_or_within_negative_effect",
+   "mixin": false
+  },
+  "biolink:has_non_coding_variant": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:is_non_coding_variant_of",
+   "mixin": false
+  },
+  "biolink:has_nonsense_variant": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:is_nonsense_variant_of",
+   "mixin": false
+  },
+  "biolink:has_not_completed": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_nutrient": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_output": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_part": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_participant": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_phenotype": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_plasma_membrane_part": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_positive_upstream_actor": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:acts_upstream_of_positive_effect",
+   "mixin": false
+  },
+  "biolink:has_positive_upstream_or_within_actor": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:acts_upstream_of_or_within_positive_effect",
+   "mixin": false
+  },
+  "biolink:has_preventative_intervention": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:preventative_for_condition",
+   "mixin": false
+  },
+  "biolink:has_provider": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:provider",
+   "mixin": false
+  },
+  "biolink:has_publisher": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:publisher",
+   "mixin": false
+  },
+  "biolink:has_sequence_location": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_sequence_variant": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:is_sequence_variant_of",
+   "mixin": false
+  },
+  "biolink:has_side_effect": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_splice_site_variant": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:is_splice_site_variant_of",
+   "mixin": false
+  },
+  "biolink:has_substrate": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:has_synonymous_variant": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:is_synonymous_variant_of",
+   "mixin": false
+  },
+  "biolink:has_target": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:target_for",
+   "mixin": false
+  },
+  "biolink:has_upstream_actor": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:acts_upstream_of",
+   "mixin": false
+  },
+  "biolink:has_upstream_or_within_actor": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:acts_upstream_of_or_within",
+   "mixin": false
+  },
+  "biolink:has_variant_part": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:homologous_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:in_cell_population_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:in_clinical_trials_for": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:in_complex_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:in_linkage_disequilibrium_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:in_pathway_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:in_preclinical_trials_for": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:in_taxon": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:increased_amount_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_increased_amount",
+   "mixin": false
+  },
+  "biolink:increased_likelihood_associated_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:associated_with_increased_likelihood_of",
+   "mixin": false
+  },
+  "biolink:increases_amount_or_activity_of": {
+   "abstract": false,
+   "deprecated": true,
+   "inverse": null,
+   "mixin": true
+  },
+  "biolink:increases_sensitivity_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:indirectly_physically_interacts_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:interacts_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": true
+  },
+  "biolink:is_active_ingredient_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_active_ingredient",
+   "mixin": false
+  },
+  "biolink:is_chemical_role_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_chemical_role",
+   "mixin": false
+  },
+  "biolink:is_diagnosed_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:diagnoses",
+   "mixin": false
+  },
+  "biolink:is_excipient_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_excipient",
+   "mixin": false
+  },
+  "biolink:is_frameshift_variant_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:is_input_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_input",
+   "mixin": false
+  },
+  "biolink:is_metabolite_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_metabolite",
+   "mixin": false
+  },
+  "biolink:is_missense_variant_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:is_molecular_consequence_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_molecular_consequence",
+   "mixin": false
+  },
+  "biolink:is_nearby_variant_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:is_non_coding_variant_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:is_nonsense_variant_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:is_output_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_output",
+   "mixin": false
+  },
+  "biolink:is_sequence_variant_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:is_side_effect_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_side_effect",
+   "mixin": false
+  },
+  "biolink:is_splice_site_variant_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:is_substrate_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_substrate",
+   "mixin": false
+  },
+  "biolink:is_synonymous_variant_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:lacks_part": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:likelihood_affected_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:affects_likelihood_of",
+   "mixin": false
+  },
+  "biolink:likelihood_associated_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:associated_with_likelihood_of",
+   "mixin": false
+  },
+  "biolink:located_in": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:location_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:located_in",
+   "mixin": false
+  },
+  "biolink:location_of_disease": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:disease_has_location",
+   "mixin": false
+  },
+  "biolink:manifestation_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:member_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_member",
+   "mixin": false
+  },
+  "biolink:mentioned_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:mentions",
+   "mixin": false
+  },
+  "biolink:mentions": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:missing_from": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:lacks_part",
+   "mixin": false
+  },
+  "biolink:mode_of_inheritance_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_mode_of_inheritance",
+   "mixin": false
+  },
+  "biolink:model_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:models": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:model_of",
+   "mixin": false
+  },
+  "biolink:models_demonstrating_benefits_for": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:beneficial_in_models_for",
+   "mixin": false
+  },
+  "biolink:narrow_match": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:broad_match",
+   "mixin": false
+  },
+  "biolink:negatively_correlated_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:not_completed_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_not_completed",
+   "mixin": false
+  },
+  "biolink:nutrient_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_nutrient",
+   "mixin": false
+  },
+  "biolink:occurs_in": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:occurs_in_disease": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:disease_has_basis_in",
+   "mixin": false
+  },
+  "biolink:occurs_together_in_literature_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:opposite_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:orthologous_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:overlaps": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:paralogous_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:part_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_part",
+   "mixin": false
+  },
+  "biolink:participates_in": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_participant",
+   "mixin": false
+  },
+  "biolink:pharmacologically_interacts_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:phenotype_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_phenotype",
+   "mixin": false
+  },
+  "biolink:physically_interacts_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:plasma_membrane_part_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_plasma_membrane_part",
+   "mixin": false
+  },
+  "biolink:positively_correlated_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:preceded_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:precedes",
+   "mixin": false
+  },
+  "biolink:precedes": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:predisposes_to_condition": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:preventative_for_condition": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:primarily_composed_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:composed_primarily_of",
+   "mixin": false
+  },
+  "biolink:produced_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:produces",
+   "mixin": false
+  },
+  "biolink:produces": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:promotes_condition": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": true
+  },
+  "biolink:provider": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:publisher": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:regulated_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:regulates",
+   "mixin": false
+  },
+  "biolink:regulates": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:related_condition": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:related_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:related_to_at_concept_level": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:related_to_at_instance_level": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:resistance_associated_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:associated_with_resistance_to",
+   "mixin": false
+  },
+  "biolink:response_associated_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:associated_with_response_to",
+   "mixin": false
+  },
+  "biolink:same_as": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:sensitivity_affected_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:affects_sensitivity_to",
+   "mixin": false
+  },
+  "biolink:sensitivity_associated_with": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:associated_with_sensitivity_to",
+   "mixin": false
+  },
+  "biolink:sensitivity_decreased_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:decreases_sensitivity_to",
+   "mixin": false
+  },
+  "biolink:sensitivity_increased_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:increases_sensitivity_to",
+   "mixin": false
+  },
+  "biolink:sequence_location_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_sequence_location",
+   "mixin": false
+  },
+  "biolink:similar_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:studied_to_treat": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:subclass_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:subject_of_treatment_application_or_study_for_treatment_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:treats_or_applied_or_studied_to_treat",
+   "mixin": true
+  },
+  "biolink:superclass_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:subclass_of",
+   "mixin": false
+  },
+  "biolink:target_for": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:taxon_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:in_taxon",
+   "mixin": false
+  },
+  "biolink:temporally_related_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:tested_by_clinical_trials_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:in_clinical_trials_for",
+   "mixin": false
+  },
+  "biolink:tested_by_preclinical_trials_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:in_preclinical_trials_for",
+   "mixin": false
+  },
+  "biolink:transcribed_from": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:transcribed_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:transcribed_from",
+   "mixin": false
+  },
+  "biolink:translates_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:translation_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:translates_to",
+   "mixin": false
+  },
+  "biolink:treated_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:treats",
+   "mixin": true
+  },
+  "biolink:treated_in_studies_by": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:studied_to_treat",
+   "mixin": false
+  },
+  "biolink:treatment_applications_from": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:applied_to_treat",
+   "mixin": false
+  },
+  "biolink:treats": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": true
+  },
+  "biolink:treats_or_applied_or_studied_to_treat": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": true
+  },
+  "biolink:variant_part_of": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": "biolink:has_variant_part",
+   "mixin": false
+  },
+  "biolink:was_tested_for_effect_of": {
+   "abstract": false,
+   "deprecated": true,
+   "inverse": "biolink:was_tested_for_effect_on",
+   "mixin": false
+  },
+  "biolink:was_tested_for_effect_on": {
+   "abstract": false,
+   "deprecated": true,
+   "inverse": null,
+   "mixin": false
+  },
+  "biolink:xenologous_to": {
+   "abstract": false,
+   "deprecated": false,
+   "inverse": null,
+   "mixin": false
+  }
+ },
+ "qualifiers": [
+  "anatomical_context_qualifier",
+  "aspect_qualifier",
+  "association_basis_qualifier",
+  "catalyst_qualifier",
+  "causal_mechanism_qualifier",
+  "clinical_modifier_qualifier",
+  "context_qualifier",
+  "derivative_qualifier",
+  "direction_qualifier",
+  "disease_context_qualifier",
+  "form_or_variant_qualifier",
+  "frequency_qualifier",
+  "object_activity_qualifier",
+  "object_aspect_qualifier",
+  "object_context_qualifier",
+  "object_derivative_qualifier",
+  "object_direction_qualifier",
+  "object_form_or_variant_qualifier",
+  "object_part_qualifier",
+  "object_process_qualifier",
+  "object_specialization_qualifier",
+  "onset_qualifier",
+  "part_qualifier",
+  "population_context_qualifier",
+  "process_qualifier",
+  "qualified_predicate",
+  "qualifier",
+  "quantifier_qualifier",
+  "response_context_qualifier",
+  "response_target_context_qualifier",
+  "sequence_variant_qualifier",
+  "severity_qualifier",
+  "sex_qualifier",
+  "specialization_qualifier",
+  "species_context_qualifier",
+  "stage_qualifier",
+  "statement_qualifier",
+  "statistical_significance_qualifier",
+  "subject_activity_qualifier",
+  "subject_aspect_qualifier",
+  "subject_context_qualifier",
+  "subject_derivative_qualifier",
+  "subject_direction_qualifier",
+  "subject_form_or_variant_qualifier",
+  "subject_part_qualifier",
+  "subject_process_qualifier",
+  "subject_specialization_qualifier",
+  "temporal_context_qualifier",
+  "temporal_interval_qualifier"
+ ],
+ "source_sha256": "5837907e1eb579812856579feea5a099665252f2454bd6f950d63fbb00f4c9f0",
+ "source_url": "https://raw.githubusercontent.com/biolink/biolink-model/v4.4.6/biolink-model.yaml"
+}

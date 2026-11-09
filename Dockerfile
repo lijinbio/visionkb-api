@@ -26,7 +26,8 @@ LABEL org.opencontainers.image.source="https://github.com/lijinbio/visionkb-api"
 COPY --from=build /install /usr/local
 RUN groupadd --system --gid 10001 visionkb \
     && useradd --system --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin visionkb \
-    && python -c "import visionkb_api, duckdb, neo4j, psycopg; print('visionkb-api', visionkb_api.__version__)"
+    && python -c "import duckdb, neo4j, psycopg, visionkb_api; from visionkb_api.vocab import biolink; \
+assert biolink()['biolink_version'] == '4.4.6'; print('visionkb-api', visionkb_api.__version__)"
 # Runs with a read-only root filesystem: no bytecode writes; /tmp is the only scratch (tmpfs/emptyDir).
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

@@ -10,7 +10,7 @@ dist/
 *.tar.sha256
 *.parquet
 # data, fixtures and runtime state live outside the repository
-fixtures-out/
-data/
-secrets/
+/fixtures-out/
+/data/
+/secrets/
 tokens*.tsv
