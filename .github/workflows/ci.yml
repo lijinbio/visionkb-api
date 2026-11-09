@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FIXTURE_RELEASE: visionkb-2026.11.0-fixture
+  FIXTURE_RELEASE: visionkb-0000.01.0
   NEO4J_IMAGE: neo4j:2026.10.1-community
 
 jobs:
@@ -114,6 +114,33 @@ jobs:
           export NEO4J_PASSWORD_FILE="$RUNNER_TEMP/neo4j_password" VISIONKB_PG_DSN_FILE="$RUNNER_TEMP/pg_dsn"
           export VISIONKB_TEST_RELEASE_DIR="$RUNNER_TEMP/fixtures/$FIXTURE_RELEASE"
           uv run pytest -rs
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          load: true
+          tags: visionkb-api:ci
+      - name: Image against the live services (/v1/ready 200, HEALTHCHECK healthy)
+        run: |
+          sec="$RUNNER_TEMP/image-secrets"; mkdir -p "$sec"
+          cp "$RUNNER_TEMP/neo4j_password" "$RUNNER_TEMP/pg_dsn" "$sec/"
+          printf '%s\tread\n' "$(openssl rand -hex 16)" > "$sec/tokens.tsv"
+          chmod 644 "$sec"/*   # readable by the image user (uid 10001); ephemeral CI credentials
+          docker run -d --name api-live --network host --read-only --tmpfs /tmp --health-interval 2s \
+            -v "$RUNNER_TEMP/fixtures/$FIXTURE_RELEASE:/release:ro" -v "$sec:/run/secrets:ro" \
+            -e NEO4J_URI=bolt://127.0.0.1:7687 -e NEO4J_PASSWORD_FILE=/run/secrets/neo4j_password \
+            -e VISIONKB_PG_DSN_FILE=/run/secrets/pg_dsn -e VISIONKB_API_TOKENS_FILE=/run/secrets/tokens.tsv \
+            -e VISIONKB_VERIFY_CHECKSUMS=1 visionkb-api:ci
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8770/v1/ready >/dev/null && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8770/v1/ready | tee /dev/stderr | python3 -c '
+          import json, sys
+          b = json.load(sys.stdin)
+          assert b["status"] == "ok" and all(b["data"][k]["status"] == "ok" for k in ("neo4j", "summaries", "postgres")), b'
+          for i in $(seq 1 40); do s="$(docker inspect -f '{{.State.Health.Status}}' api-live)"; [ "$s" = healthy ] && break; sleep 2; done
+          echo "health: $s"; test "$s" = healthy
+      - if: always()
+        run: docker logs api-live || true
 
   install:
     # Users install with pip, not uv: check that route from a clean interpreter.
@@ -167,8 +194,11 @@ jobs:
           b = json.load(sys.stdin)
           assert b["data"][0]["gene_symbol"] == "RHO" and b["data"][0]["group_label"] == "Rod", b'
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8770/v1/release)" = 401
-          for i in $(seq 1 30); do s="$(docker inspect -f '{{.State.Health.Status}}' api)"; [ "$s" = healthy ] && break; sleep 2; done
-          echo "health: $s"; test "$s" = healthy
+          # No databases here: /v1/ready must be 503 and the HEALTHCHECK (on /v1/ready) must go unhealthy.
+          test "$(curl -s -o /tmp/ready.json -w '%{http_code}' http://127.0.0.1:8770/v1/ready)" = 503
+          python3 -c 'import json; b = json.load(open("/tmp/ready.json")); assert b["error"]["message"] == "not ready: neo4j, postgres", b'
+          for i in $(seq 1 40); do s="$(docker inspect -f '{{.State.Health.Status}}' api)"; [ "$s" = unhealthy ] && break; sleep 2; done
+          echo "health: $s"; test "$s" = unhealthy
           test "$(docker run --rm visionkb-api:ci id -u)" = 10001
           docker run --rm visionkb-api:ci python -c 'import visionkb_api; print(visionkb_api.__version__)'
       - if: always()

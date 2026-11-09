@@ -239,11 +239,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     read = Depends(scope("read"))
 
     # -- service -------------------------------------------------------------------------------
-    @app.get("/v1/health", tags=["service"], response_model=Envelope[Health])
-    def health(request: Request):
-        """Component status. No authentication. HTTP 200 while the process serves the release."""
-        ctx = Ctx(request)
-        st = ctx.st
+    def components(st: State) -> tuple[dict[str, dict[str, Any]], list[str]]:
+        """Status of neo4j, summaries and postgres (live pings), plus warnings for each one not ok."""
+        notes: list[str] = []
         neo: dict[str, Any] = {"status": "not_configured", "detail": st.graph_error}
         if st.graph is not None:
             try:
@@ -251,7 +249,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 neo = {"status": "ok", **info}
                 if info.get("kg_release") and info["kg_release"] != st.kg_release:
                     neo["status"] = "mismatch"
-                    ctx.warnings.append(f"Neo4j holds {info['kg_release']}, the API serves {st.kg_release}")
+                    notes.append(f"Neo4j holds {info['kg_release']}, the API serves {st.kg_release}")
             except ApiError as exc:
                 neo = {"status": "error", "detail": exc.message}
         summ = (
@@ -265,11 +263,46 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 pg = {"status": "ok", **st.proposals.ping()}
             except ApiError as exc:
                 pg = {"status": "error", "detail": exc.message}
-        for name, comp in (("neo4j", neo), ("summaries", summ), ("postgres", pg)):
-            if comp["status"] != "ok":
-                ctx.warnings.append(f"{name}: {comp['status']}")
-        data = {"neo4j": neo, "summaries": summ, "postgres": pg, "release": st.kg_release, "version": __version__}
-        return ctx.respond(data)
+        comps = {"neo4j": neo, "summaries": summ, "postgres": pg}
+        notes += [f"{name}: {c['status']}" for name, c in comps.items() if c["status"] != "ok"]
+        return comps, notes
+
+    @app.get("/v1/health", tags=["service"], response_model=Envelope[Health])
+    def health(request: Request):
+        """Component status for people and monitoring. No authentication. HTTP 200 while the process serves
+        the release; components that are not ok are listed in `warnings`. Use `/v1/ready` for readiness probes."""
+        ctx = Ctx(request)
+        comps, notes = components(ctx.st)
+        ctx.warnings += notes
+        return ctx.respond({**comps, "release": ctx.st.kg_release, "version": __version__})
+
+    @app.get(
+        "/v1/ready",
+        tags=["service"],
+        response_model=Envelope[Health],
+        responses={503: {"model": Envelope[Health], "description": "a component is not ok; error.message lists them"}},
+    )
+    def ready(request: Request):
+        """Readiness. No authentication. HTTP 200 only when the release is loaded and neo4j, summaries and
+        postgres are all ok; otherwise HTTP 503, `status: error`, code `not_ready`, and the failing components
+        in `error.message` and `warnings`. `data` carries the same component status as `/v1/health`."""
+        ctx = Ctx(request)
+        st = ctx.st
+        comps, notes = components(st)
+        ctx.warnings += notes
+        data = {**comps, "release": st.kg_release, "version": __version__}
+        failing = [name for name, c in comps.items() if c["status"] != "ok"]
+        if st.release is None:
+            failing.insert(0, "release")
+        if not failing:
+            return ctx.respond(data)
+        env = envelope(
+            st.kg_release,
+            data,
+            warnings=ctx.warnings,
+            error={"code": "not_ready", "message": "not ready: " + ", ".join(failing)},
+        )
+        return JSONResponse(fit(env, st.settings.max_chars), status_code=503)
 
     @app.get("/v1/release", tags=["service"], dependencies=[read])
     def release(request: Request):

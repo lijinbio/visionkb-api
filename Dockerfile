@@ -37,6 +37,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     VISIONKB_RELEASE_DIR=/release
 USER 10001:10001
 EXPOSE 8770
+# Healthy = ready: release loaded and Neo4j, summaries and PostgreSQL ok (/v1/ready answers 503 otherwise).
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD ["python", "-c", "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:' + os.environ.get('VISIONKB_API_PORT', '8770') + '/v1/health', timeout=4)"]
+  CMD ["python", "-c", "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:' + os.environ.get('VISIONKB_API_PORT', '8770') + '/v1/ready', timeout=4)"]
 CMD ["visionkb-api", "serve"]

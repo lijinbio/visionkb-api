@@ -29,7 +29,7 @@ NEO4J_HTTP_PORT="${NEO4J_HTTP_PORT:-17474}"
 PG_PORT="${PG_PORT:-15433}"
 NEO4J_NAME="${NEO4J_NAME:-vkb-api-neo4j}"
 PG_NAME="${PG_NAME:-vkb-api-pg}"
-FIXTURE="$STATE/fixtures/visionkb-2026.11.0-fixture"
+FIXTURE="$STATE/fixtures/visionkb-0000.01.0"
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 
 if ! command -v apptainer >/dev/null 2>&1 && [[ -f /usr/share/Modules/init/bash ]]; then

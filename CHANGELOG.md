@@ -5,6 +5,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); ver
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-09
+
+### Added
+
+- `GET /v1/ready` (no auth): HTTP 200 only when the release is loaded and Neo4j, summaries and PostgreSQL
+  are all ok; otherwise HTTP 503, `error.code` `not_ready`, failing components in `error.message` and
+  `warnings`. `/v1/health` is unchanged (always 200, degraded components in `warnings`).
+- CI runs the built image against the live Neo4j/PostgreSQL service containers and requires `/v1/ready`
+  200 and a healthy HEALTHCHECK; the no-database smoke test requires 503 and an unhealthy HEALTHCHECK.
+
+### Changed
+
+- Dockerfile `HEALTHCHECK` probes `/v1/ready` instead of `/v1/health`; `visionkb-api check` exits 0 only
+  when `/v1/ready` is 200.
+- `RELEASE` must match the contract pattern `visionkb-YYYY.MM.N`. The test fixture release is now
+  `visionkb-0000.01.0` (was `visionkb-2026.11.0-fixture`), bundle `visionkb-0000.01.0.tar` + `.sha256`.
+
+### Documentation
+
+- Tokens file format: a TAB between token and scopes; scopes separated by commas and/or whitespace
+  (`token<TAB>read`, `token<TAB>read,proposals:read`), `#` comments, tokens of 16+ characters.
+
 ## [0.1.0] - 2026-11-09
 
 ### Added

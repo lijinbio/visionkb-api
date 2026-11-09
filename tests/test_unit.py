@@ -34,7 +34,7 @@ def ok(r, code=200):
     assert r.status_code == code, r.text
     body = r.json()
     assert body["status"] == "ok" and body["error"] is None
-    assert body["kg_release"] == "visionkb-2026.11.0-fixture"
+    assert body["kg_release"] == "visionkb-0000.01.0"
     return body
 
 
@@ -122,12 +122,20 @@ def test_settings_from_env_only_release_dir(tmp_path):
 
 # -- release bundle ----------------------------------------------------------------------------
 def test_release_loads(release_dir):
-    rel = load_release(release_dir, "visionkb-2026.11.0-fixture", verify_checksums=True)
-    assert rel.kg_release == "visionkb-2026.11.0-fixture"
+    rel = load_release(release_dir, "visionkb-0000.01.0", verify_checksums=True)
+    assert rel.kg_release == "visionkb-0000.01.0"
     assert {d["id"] for d in rel.datasets} == {"visionkb:ds-hrca-snrna", "visionkb:ds-rpe-scrna"}
     assert rel.checks["sha256"] == "ok"
     with pytest.raises(ConfigError, match="VISIONKB_KG_RELEASE"):
         load_release(release_dir, "visionkb-2026.11.1")
+
+
+def test_release_id_must_match_contract(release_dir, tmp_path):
+    dst = tmp_path / "bad"
+    shutil.copytree(release_dir, dst)
+    (dst / "RELEASE").write_text("visionkb-2026.11.0-fixture\n")
+    with pytest.raises(ConfigError, match=r"expected visionkb-YYYY\.MM\.N"):
+        load_release(dst)
 
 
 def _copy(release_dir, tmp_path) -> Path:
@@ -201,10 +209,22 @@ def test_summaries(release_dir):
 def test_health_without_databases(client):
     body = ok(client.get("/v1/health"))
     d = body["data"]
-    assert d["release"] == "visionkb-2026.11.0-fixture"
+    assert d["release"] == "visionkb-0000.01.0"
     assert d["summaries"]["status"] == "ok" and d["summaries"]["n_rows"] == 80
     assert d["neo4j"]["status"] == "not_configured" and d["postgres"]["status"] == "not_configured"
     assert any(w.startswith("neo4j") for w in body["warnings"])
+
+
+def test_ready_without_databases(client):
+    r = client.get("/v1/ready")
+    assert r.status_code == 503, r.text
+    b = r.json()
+    assert b["status"] == "error" and b["kg_release"] == "visionkb-0000.01.0"
+    assert b["error"]["code"] == "not_ready" and b["error"]["message"] == "not ready: neo4j, postgres"
+    assert b["data"]["summaries"]["status"] == "ok" and b["data"]["neo4j"]["status"] == "not_configured"
+    assert "neo4j: not_configured" in b["warnings"] and "postgres: not_configured" in b["warnings"]
+    # health stays 200 for people and monitoring
+    assert client.get("/v1/health").status_code == 200
 
 
 def test_auth_required(client):

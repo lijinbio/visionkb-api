@@ -27,7 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     sp.add_argument("--workers", type=int, default=1)
     op = sub.add_parser("openapi", help="write the OpenAPI document")
     op.add_argument("--out", type=Path, help="file to write (default stdout)")
-    sub.add_parser("check", help="load the release and ping Neo4j/PostgreSQL; print JSON")
+    sub.add_parser("check", help="load the release, print /v1/ready; exit 0 only if every component is ok")
     a = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
@@ -48,11 +48,9 @@ def main(argv: list[str] | None = None) -> int:
         from .app import create_app
 
         with TestClient(create_app(settings)) as c:
-            r = c.get("/v1/health")
+            r = c.get("/v1/ready")
         sys.stdout.write(json.dumps(r.json(), indent=2) + "\n")
-        data = r.json().get("data") or {}
-        ok = all((data.get(k) or {}).get("status") == "ok" for k in ("neo4j", "summaries"))
-        return 0 if ok else 1
+        return 0 if r.status_code == 200 else 1
 
     import uvicorn
 

@@ -10,6 +10,8 @@ PostgreSQL proposals queue. Package `visionkb_api` under `src/`; contracts in `d
 - SQL (DuckDB, PostgreSQL): bound parameters only; sort/level values come from allowlists.
 - The release bundle directory is the only file input; never open paths found in the data.
 - Secrets only from `*_FILE` paths; never log them.
+- `/v1/health` (200, degraded components in warnings) is for people/monitoring; `/v1/ready` (503 unless
+  neo4j, summaries, postgres ok) is the HEALTHCHECK/readiness probe.
 - Every response: envelope with `kg_release`; default limit 50, max 200, about 24,000 characters (`envelope.fit`).
 - After changing an endpoint: `uv run visionkb-api openapi --out docs/openapi.json` and regenerate
   `docs/api.md` with `scripts/make_api_docs.py` (needs the live services).

@@ -35,7 +35,7 @@ With Docker, `.github/workflows/ci.yml` (job `integration`) shows the same steps
 | --- | --- |
 | Contracts | `docs/contracts.md` is a sanitized copy; change the authoritative contract first, then code |
 | Queries | parameterized Cypher and SQL only; no request value is ever spliced into a query string |
-| Responses | the envelope, `kg_release` on every response, limits and the 24,000-character budget |
+| Responses | the envelope, `kg_release` on every response, limits and the 24,000-character budget; `/v1/health` always 200, `/v1/ready` 503 unless every component is ok |
 | Vocabulary | Biolink 4.4.6, vendored by `scripts/vendor_biolink.py` (records the source sha256) |
 | Tests | unit tests on the fixture files; integration tests against live services; no mocks of the databases |
 | Docs | `docs/openapi.json` must match the app (checked in CI); regenerate `docs/api.md` when responses change |

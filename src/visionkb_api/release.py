@@ -16,7 +16,8 @@ from pathlib import Path, PurePosixPath
 
 from .config import ConfigError
 
-RELEASE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._\-]{0,80}$")
+# Contract §1: kg_release = visionkb-YYYY.MM.N (the test fixture uses visionkb-0000.01.0).
+RELEASE_ID_RE = re.compile(r"^visionkb-\d{4}\.\d{2}\.\d+$")
 MANIFEST_SUBSET = (
     "kg_release",
     "created_utc",
@@ -108,7 +109,7 @@ def load_release(path: Path | None, expected: str | None = None, *, verify_check
     except OSError:
         raise ConfigError("RELEASE file is missing from the release directory") from None
     if not RELEASE_ID_RE.match(rid):
-        raise ConfigError(f"invalid release id in RELEASE: {rid!r}")
+        raise ConfigError(f"invalid release id in RELEASE: {rid!r} (expected visionkb-YYYY.MM.N)")
     if expected and rid != expected:
         raise ConfigError(f"RELEASE is {rid!r} but VISIONKB_KG_RELEASE is {expected!r}")
     try:

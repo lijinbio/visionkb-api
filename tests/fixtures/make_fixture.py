@@ -22,7 +22,7 @@ import shutil
 import tarfile
 from pathlib import Path
 
-RELEASE = "visionkb-2026.11.0-fixture"
+RELEASE = "visionkb-0000.01.0"
 CREATED = "2026-11-09T00:00:00Z"
 HUMAN = "NCBITaxon:9606"
 RETINA, RPE_LAYER = "UBERON:0000966", "UBERON:0001782"

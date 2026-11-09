@@ -1,4 +1,10 @@
-"""Bearer tokens from ``VISIONKB_API_TOKENS_FILE`` (lines ``token<TAB>scopes``)."""
+"""Bearer tokens from ``VISIONKB_API_TOKENS_FILE``.
+
+One token per line: ``token<TAB>scopes``. The token and the scopes are separated by a TAB; the scopes
+themselves by commas and/or whitespace (``read``, ``read,proposals:read``, ``read proposals:read`` all work).
+Scopes: ``read``, ``proposals:read``, ``proposals:write``. Blank lines and lines starting with ``#`` are
+ignored; tokens must be at least 16 characters.
+"""
 
 from __future__ import annotations
 

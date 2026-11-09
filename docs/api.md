@@ -20,8 +20,10 @@ Every response, success or error, is one envelope:
   that the release does not use `400 predicate_not_in_release`, request-schema problems `422
   invalid_request`, a down database `503 neo4j_unavailable` / `postgres_unavailable`.
 - Auth: `Authorization: Bearer <token>`. Tokens live in `VISIONKB_API_TOKENS_FILE`, one
-  `token<TAB>scopes` per line; scopes `read` (all GET endpoints except health), `proposals:read`,
-  `proposals:write`. `/v1/health` needs no token.
+  `token<TAB>scopes` per line: a TAB between token and scopes, scopes separated by commas and/or spaces
+  (`token<TAB>read`, `token<TAB>read,proposals:read`); `#` starts a comment; tokens have 16+ characters.
+  Scopes: `read` (all GET endpoints except health/ready), `proposals:read`, `proposals:write`.
+  `/v1/health` and `/v1/ready` need no token.
 - The API reads only the release bundle directory (`VISIONKB_RELEASE_DIR`), Neo4j and PostgreSQL.
   Paths in dataset records (`h5ad_path`, `soma_uri`, `bind.path`) are metadata for clients that run
   where the data are; the service never opens them.
@@ -45,14 +47,14 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": {
     "neo4j": {
       "status": "ok",
       "name": "Neo4j Kernel",
       "version": "2026.10.1",
       "edition": "community",
-      "kg_release": "visionkb-2026.11.0-fixture"
+      "kg_release": "visionkb-0000.01.0"
     },
     "summaries": {
       "status": "ok",
@@ -63,12 +65,92 @@ HTTP 200
       "server_version": "17.11 (Debian 17.11-1.pgdg13+2)",
       "schema_version": 1
     },
-    "release": "visionkb-2026.11.0-fixture",
-    "version": "0.1.0"
+    "release": "visionkb-0000.01.0",
+    "version": "0.1.1"
   },
   "page": null,
   "warnings": [],
   "error": null
+}
+```
+
+## Ready
+
+`GET /v1/ready`
+
+Readiness, no auth (container HEALTHCHECK, Kubernetes readiness probe). HTTP 200 only when the release is loaded and neo4j, summaries and postgres are all ok; otherwise HTTP 503 with `status: error`, `error.code` `not_ready`, the failing components in `error.message` and `warnings`, and the same component status in `data` as `/v1/health`.
+
+```bash
+curl -s "$VISIONKB_API_URL/v1/ready"
+```
+
+HTTP 200
+
+```json
+{
+  "status": "ok",
+  "kg_release": "visionkb-0000.01.0",
+  "data": {
+    "neo4j": {
+      "status": "ok",
+      "name": "Neo4j Kernel",
+      "version": "2026.10.1",
+      "edition": "community",
+      "kg_release": "visionkb-0000.01.0"
+    },
+    "summaries": {
+      "status": "ok",
+      "n_rows": 80
+    },
+    "postgres": {
+      "status": "ok",
+      "server_version": "17.11 (Debian 17.11-1.pgdg13+2)",
+      "schema_version": 1
+    },
+    "release": "visionkb-0000.01.0",
+    "version": "0.1.1"
+  },
+  "page": null,
+  "warnings": [],
+  "error": null
+}
+```
+
+```bash
+curl -s "$VISIONKB_API_URL/v1/ready"   # an instance without Neo4j/PostgreSQL
+```
+
+HTTP 503
+
+```json
+{
+  "status": "error",
+  "kg_release": "visionkb-0000.01.0",
+  "data": {
+    "neo4j": {
+      "status": "not_configured",
+      "detail": "NEO4J_URI is not set"
+    },
+    "summaries": {
+      "status": "ok",
+      "n_rows": 80
+    },
+    "postgres": {
+      "status": "not_configured",
+      "detail": "VISIONKB_PG_DSN_FILE is not set"
+    },
+    "release": "visionkb-0000.01.0",
+    "version": "0.1.1"
+  },
+  "page": null,
+  "warnings": [
+    "neo4j: not_configured",
+    "postgres: not_configured"
+  ],
+  "error": {
+    "code": "not_ready",
+    "message": "not ready: neo4j, postgres"
+  }
 }
 ```
 
@@ -87,9 +169,9 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": {
-    "kg_release": "visionkb-2026.11.0-fixture",
+    "kg_release": "visionkb-0000.01.0",
     "created_utc": "2026-11-09T00:00:00Z",
     "biolink_version": "4.4.6",
     "schema_version": "fixture",
@@ -193,7 +275,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": [
     {
       "id": "HGNC:10012",
@@ -230,7 +312,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": [
     {
       "id": "CL:0000636",
@@ -273,7 +355,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": {
     "node": {
       "symbol": "RHO",
@@ -327,7 +409,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": [
     {
       "edge_id": "visionkb:e-bc6deb9129d18b679f825df2271811760612ddc9",
@@ -379,7 +461,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": [
     {
       "edge_id": "visionkb:e-9ae5ef6a3c1a699c1768566e5aa1900f04c27707",
@@ -473,13 +555,13 @@ HTTP 400
 ```json
 {
   "status": "error",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": null,
   "page": null,
   "warnings": [],
   "error": {
     "code": "predicate_not_in_release",
-    "message": "biolink:treats is not in visionkb-2026.11.0-fixture; present: expressed_in, gene_associated_with_condition, subclass_of"
+    "message": "biolink:treats is not in visionkb-0000.01.0; present: expressed_in, gene_associated_with_condition, subclass_of"
   }
 }
 ```
@@ -499,7 +581,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": {
     "edge": {
       "edge_id": "visionkb:e-bc6deb9129d18b679f825df2271811760612ddc9",
@@ -567,7 +649,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": {
     "edge": {
       "edge_id": "visionkb:e-9ae5ef6a3c1a699c1768566e5aa1900f04c27707",
@@ -653,7 +735,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": [
     {
       "gene_id": "HGNC:710",
@@ -767,7 +849,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": [
     {
       "gene_id": "HGNC:10012",
@@ -816,7 +898,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": [
     {
       "dataset_id": "visionkb:ds-hrca-snrna",
@@ -901,7 +983,7 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": [
     {
       "access_level": "lab",
@@ -921,7 +1003,7 @@ HTTP 200
       "format": "soma",
       "h5ad_path": "/path/to/atlas/rpe-scrna.h5ad",
       "id": "visionkb:ds-rpe-scrna",
-      "kg_release": "visionkb-2026.11.0-fixture",
+      "kg_release": "visionkb-0000.01.0",
       "levels": [
         "majorclass"
       ],
@@ -993,9 +1075,9 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": {
-    "proposal_id": "visionkb:p-7b37c2e3a2d241ae86ead3bcf26ea56a",
+    "proposal_id": "visionkb:p-3cf599d43bba4d7fb5e0753b8ea4f1b7",
     "status": "proposed",
     "created": false
   },
@@ -1016,34 +1098,35 @@ HTTP 200
 ```json
 {
   "status": "ok",
-  "kg_release": "visionkb-2026.11.0-fixture",
+  "kg_release": "visionkb-0000.01.0",
   "data": [
     {
-      "proposal_id": "visionkb:p-c2d88bc3cc3d4332b845e5a8e5b05c8a",
-      "created_utc": "2026-11-09T10:17:35.891884-08:00",
+      "proposal_id": "visionkb:p-3cf599d43bba4d7fb5e0753b8ea4f1b7",
+      "created_utc": "2026-11-09T12:11:26.367831-08:00",
       "status": "proposed",
-      "kg_release": "visionkb-2026.11.0-fixture",
-      "run_id": "it-0e9a36d707a9",
+      "kg_release": "visionkb-0000.01.0",
+      "run_id": "docs-example-run",
       "visibility": "lab",
-      "submitted_by": "t-50ea671f31c7b641",
-      "subject": "HGNC:999999",
+      "submitted_by": "t-04579e9856f830ad",
+      "subject": "HGNC:16665",
       "predicate": "biolink:expressed_in",
       "object": "CL:0000115",
       "edge": {
         "object": "CL:0000115",
-        "subject": "HGNC:999999",
+        "subject": "HGNC:16665",
         "predicate": "biolink:expressed_in",
         "agent_type": "data_analysis_pipeline",
         "publications": [],
         "knowledge_level": "observation",
         "primary_knowledge_source": "infores:visionkb-aiscientist",
+        "species_context_qualifier": "NCBITaxon:9606",
         "anatomical_context_qualifier": "UBERON:0000966"
       },
       "evidence": [
         {
-          "note": "integration test",
           "dataset_id": "visionkb:ds-hrca-snrna",
-          "group_label": "Endo"
+          "group_label": "Endo",
+          "pct_expressing": 0.33
         }
       ],
       "review_note": null
@@ -1052,7 +1135,7 @@ HTTP 200
   "page": {
     "limit": 1,
     "offset": 0,
-    "total": 5
+    "total": 9
   },
   "warnings": [],
   "error": null

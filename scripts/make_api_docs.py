@@ -43,8 +43,10 @@ Every response, success or error, is one envelope:
   that the release does not use `400 predicate_not_in_release`, request-schema problems `422
   invalid_request`, a down database `503 neo4j_unavailable` / `postgres_unavailable`.
 - Auth: `Authorization: Bearer <token>`. Tokens live in `VISIONKB_API_TOKENS_FILE`, one
-  `token<TAB>scopes` per line; scopes `read` (all GET endpoints except health), `proposals:read`,
-  `proposals:write`. `/v1/health` needs no token.
+  `token<TAB>scopes` per line: a TAB between token and scopes, scopes separated by commas and/or spaces
+  (`token<TAB>read`, `token<TAB>read,proposals:read`); `#` starts a comment; tokens have 16+ characters.
+  Scopes: `read` (all GET endpoints except health/ready), `proposals:read`, `proposals:write`.
+  `/v1/health` and `/v1/ready` need no token.
 - The API reads only the release bundle directory (`VISIONKB_RELEASE_DIR`), Neo4j and PostgreSQL.
   Paths in dataset records (`h5ad_path`, `soma_uri`, `bind.path`) are metadata for clients that run
   where the data are; the service never opens them.
@@ -62,6 +64,15 @@ SECTIONS = [
         "not ok is listed in `warnings`. `neo4j.kg_release` is read from the graph and must match the API's "
         "release (else status `mismatch`).",
         [("GET", "/v1/health", None)],
+    ),
+    (
+        "Ready",
+        "GET /v1/ready",
+        "Readiness, no auth (container HEALTHCHECK, Kubernetes readiness probe). HTTP 200 only when the release "
+        "is loaded and neo4j, summaries and postgres are all ok; otherwise HTTP 503 with `status: error`, "
+        "`error.code` `not_ready`, the failing components in `error.message` and `warnings`, and the same "
+        "component status in `data` as `/v1/health`.",
+        [("GET", "/v1/ready", None), ("GET-NO-DATABASES", "/v1/ready", None)],
     ),
     (
         "Release",
@@ -207,9 +218,16 @@ def main() -> int:
                 out.append(f"## {title}\n\n`{sig}`\n\n{text}\n")
                 for method, path, body in calls:
                     path = path.format(**ids)
-                    if method == "GET":
-                        r = c.get(path, headers=hdr if path != "/v1/health" else {})
-                        auth = "" if path == "/v1/health" else ' -H "Authorization: Bearer $TOKEN"'
+                    if method == "GET-NO-DATABASES":
+                        # Same release, Neo4j and PostgreSQL not configured: the 503 readiness answer.
+                        bare = Settings(release_dir=s.release_dir, tokens_file=tokens)
+                        with TestClient(create_app(bare)) as c2:
+                            r = c2.get(path)
+                        req = f'curl -s "$VISIONKB_API_URL{path}"   # an instance without Neo4j/PostgreSQL'
+                    elif method == "GET":
+                        noauth = path in ("/v1/health", "/v1/ready")
+                        r = c.get(path, headers={} if noauth else hdr)
+                        auth = "" if noauth else ' -H "Authorization: Bearer $TOKEN"'
                         req = f'curl -s{auth} "$VISIONKB_API_URL{path}"'
                     else:
                         r = c.post(path, headers=hdr, json=body)

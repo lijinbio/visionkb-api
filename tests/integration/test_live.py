@@ -21,7 +21,7 @@ pytestmark = [
     pytest.mark.integration,
     pytest.mark.skipif(os.environ.get("VISIONKB_IT") != "1", reason="set VISIONKB_IT=1 with live Neo4j/PostgreSQL"),
 ]
-REL = "visionkb-2026.11.0-fixture"
+REL = "visionkb-0000.01.0"
 RHO, APLN, ABCA4, ARR3, PECAM1 = "HGNC:10012", "HGNC:16665", "HGNC:34", "HGNC:710", "HGNC:8823"
 ROD, CONE, MG, RP, RP4 = "CL:0000604", "CL:0000573", "CL:0000636", "MONDO:0019200", "MONDO:0013395"
 
@@ -70,6 +70,34 @@ def test_health(client):
     assert d["neo4j"]["edition"] == "community"
     assert d["postgres"]["status"] == "ok" and d["postgres"]["schema_version"] == 1
     assert d["summaries"]["status"] == "ok"
+
+
+def test_ready(client):
+    b = ok(client.get("/v1/ready"))
+    assert all(b["data"][k]["status"] == "ok" for k in ("neo4j", "summaries", "postgres")) and b["warnings"] == []
+
+
+def test_ready_when_databases_down(release_dir, tokens_file, tmp_path):
+    """Neo4j and PostgreSQL unreachable: /v1/ready is 503 and names them; /v1/health stays 200."""
+    dsn = tmp_path / "pg_dsn"
+    dsn.write_text("postgresql://nobody:none@127.0.0.1:1/none\n")
+    s = Settings(
+        release_dir=Path(release_dir),
+        neo4j_uri="bolt://127.0.0.1:1",
+        neo4j_password_file=Path(os.environ["NEO4J_PASSWORD_FILE"]),
+        pg_dsn_file=dsn,
+        tokens_file=tokens_file,
+    )
+    with TestClient(create_app(s)) as c:
+        r = c.get("/v1/ready")
+        assert r.status_code == 503, r.text
+        b = r.json()
+        assert b["status"] == "error" and b["kg_release"] == REL
+        assert b["error"] == {"code": "not_ready", "message": "not ready: neo4j, postgres"}
+        assert b["data"]["neo4j"]["status"] == "error" and b["data"]["postgres"]["status"] == "error"
+        assert b["data"]["summaries"]["status"] == "ok"
+        h = c.get("/v1/health")
+        assert h.status_code == 200 and "neo4j: error" in h.json()["warnings"]
 
 
 def test_release_predicates(client):

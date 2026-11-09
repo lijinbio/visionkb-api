@@ -4,7 +4,7 @@
     "title": "VisionKB API",
     "summary": "Read-only access to a VisionKB knowledge-graph release, plus a curation queue for proposals.",
     "description": "Every response is an envelope `{status, kg_release, data, page, warnings, error}`. Lists default to 50 rows (max 200) and responses aim at 24,000 characters at most; trimmed lists are reported in `warnings`.",
-    "version": "0.1.0"
+    "version": "0.1.1"
   },
   "paths": {
     "/v1/health": {
@@ -13,11 +13,43 @@
           "service"
         ],
         "summary": "Health",
-        "description": "Component status. No authentication. HTTP 200 while the process serves the release.",
+        "description": "Component status for people and monitoring. No authentication. HTTP 200 while the process serves\nthe release; components that are not ok are listed in `warnings`. Use `/v1/ready` for readiness probes.",
         "operationId": "health_v1_health_get",
         "responses": {
           "200": {
             "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_Health_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ready": {
+      "get": {
+        "tags": [
+          "service"
+        ],
+        "summary": "Ready",
+        "description": "Readiness. No authentication. HTTP 200 only when the release is loaded and neo4j, summaries and\npostgres are all ok; otherwise HTTP 503, `status: error`, code `not_ready`, and the failing components\nin `error.message` and `warnings`. `data` carries the same component status as `/v1/health`.",
+        "operationId": "ready_v1_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_Health_"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "a component is not ok; error.message lists them",
             "content": {
               "application/json": {
                 "schema": {
