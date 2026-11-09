@@ -6,7 +6,7 @@
 #     -e VISIONKB_RELEASE_DIR=/release -e VISIONKB_API_TOKENS_FILE=/run/secrets/tokens.tsv \
 #     -e NEO4J_URI=bolt://neo4j:7687 -e NEO4J_PASSWORD_FILE=/run/secrets/neo4j_password \
 #     -e VISIONKB_PG_DSN_FILE=/run/secrets/pg_dsn visionkb-api:dev
-FROM python:3.13.18-slim-trixie AS build
+FROM python:3.15.0-slim-trixie AS build
 ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 RUN pip install uv==0.13.7
 WORKDIR /src
@@ -17,7 +17,7 @@ RUN uv export --locked --no-dev --no-emit-project --format requirements-txt -o /
     && pip install --prefix=/install --require-hashes -r /tmp/requirements.txt \
     && pip install --prefix=/install --no-deps .
 
-FROM python:3.13.18-slim-trixie
+FROM python:3.15.0-slim-trixie
 ARG VERSION=dev
 LABEL org.opencontainers.image.source="https://github.com/lijinbio/visionkb-api" \
       org.opencontainers.image.description="VisionKB read-only API over a knowledge-graph release" \
