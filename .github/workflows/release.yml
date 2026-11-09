@@ -22,7 +22,7 @@ jobs:
           init=$(python3 -c "import re; print(re.search(r'__version__ = \"(.+)\"', open('src/visionkb_api/__init__.py').read())[1])")
           [[ "$ver" == "$init" ]] || { echo "tag $GITHUB_REF_NAME != __version__ $init"; exit 1; }
           echo "version=$ver" >> "$GITHUB_OUTPUT"
-      - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@v10
       - run: uv sync --locked
       - run: uv run pytest -rs
       - uses: docker/login-action@v4
