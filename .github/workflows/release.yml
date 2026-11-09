@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - id: tag
+        name: Version from the tag
+        run: |
+          ver="${GITHUB_REF_NAME#v}"
+          want=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          [[ "$ver" == "$want" ]] || { echo "tag $GITHUB_REF_NAME != pyproject version $want"; exit 1; }
+          init=$(python3 -c "import re; print(re.search(r'__version__ = \"(.+)\"', open('src/visionkb_api/__init__.py').read())[1])")
+          [[ "$ver" == "$init" ]] || { echo "tag $GITHUB_REF_NAME != __version__ $init"; exit 1; }
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --locked
+      - run: uv run pytest -rs
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v4
+      - id: push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          build-args: VERSION=${{ steps.tag.outputs.version }}
+          tags: ghcr.io/${{ github.repository_owner }}/visionkb-api:${{ steps.tag.outputs.version }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.tag.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.description=VisionKB read-only API over a knowledge-graph release
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          img="ghcr.io/${{ github.repository_owner }}/visionkb-api"
+          notes="visionkb-api ${{ steps.tag.outputs.version }}."$'\n\n'"Image: \`$img:${{ steps.tag.outputs.version }}\`"$'\n'"Digest: \`$img@${{ steps.push.outputs.digest }}\`"
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes "$notes" --generate-notes

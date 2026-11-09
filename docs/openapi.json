@@ -1,0 +1,2358 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VisionKB API",
+    "summary": "Read-only access to a VisionKB knowledge-graph release, plus a curation queue for proposals.",
+    "description": "Every response is an envelope `{status, kg_release, data, page, warnings, error}`. Lists default to 50 rows (max 200) and responses aim at 24,000 characters at most; trimmed lists are reported in `warnings`.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "tags": [
+          "service"
+        ],
+        "summary": "Health",
+        "description": "Component status. No authentication. HTTP 200 while the process serves the release.",
+        "operationId": "health_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_Health_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/release": {
+      "get": {
+        "tags": [
+          "service"
+        ],
+        "summary": "Release",
+        "description": "Manifest subset (\u00a76): release id, Biolink version, code versions, sources, atlases, counts, validation.",
+        "operationId": "release_v1_release_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/entities/search": {
+      "get": {
+        "tags": [
+          "graph"
+        ],
+        "summary": "Search Entities",
+        "description": "Exact CURIE, then exact symbol (case-insensitive), then synonym, then the `entity_search` full-text index.",
+        "operationId": "search_entities_v1_entities_search_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "CURIE, symbol, synonym or free text",
+              "title": "Q"
+            },
+            "description": "CURIE, symbol, synonym or free text"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Biolink category, e.g. biolink:Gene",
+              "title": "Category"
+            },
+            "description": "Biolink category, e.g. biolink:Gene"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 1,
+              "description": "rows to return (default 50, capped at 200)",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "rows to return (default 50, capped at 200)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_list_EntityHit__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entities/{curie}": {
+      "get": {
+        "tags": [
+          "graph"
+        ],
+        "summary": "Get Entity",
+        "description": "One node with its degree by predicate and direction.",
+        "operationId": "get_entity_v1_entities__curie__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "curie",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "CURIE, e.g. HGNC:10012",
+              "title": "Curie"
+            },
+            "description": "CURIE, e.g. HGNC:10012"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_EntityDetail_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/relationships": {
+      "get": {
+        "tags": [
+          "graph"
+        ],
+        "summary": "Get Relationships",
+        "description": "Edges from `subject` and/or to `object` (at least one is required), ranked by evidence.",
+        "operationId": "get_relationships_v1_relationships_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "subject",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject"
+            }
+          },
+          {
+            "name": "object",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Object"
+            }
+          },
+          {
+            "name": "predicate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Biolink predicate present in the release",
+              "title": "Predicate"
+            },
+            "description": "Biolink predicate present in the release"
+          },
+          {
+            "name": "object_category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Object Category"
+            }
+          },
+          {
+            "name": "knowledge_level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Knowledge Level"
+            }
+          },
+          {
+            "name": "species",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "NCBITaxon CURIE",
+              "title": "Species"
+            },
+            "description": "NCBITaxon CURIE"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 1,
+              "description": "rows to return (default 50, capped at 200)",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "rows to return (default 50, capped at 200)"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_list_Relationship__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/evidence/{edge_id}": {
+      "get": {
+        "tags": [
+          "graph"
+        ],
+        "summary": "Get Evidence",
+        "description": "The edge, its StudyResult nodes (paged) and its publications.",
+        "operationId": "get_evidence_v1_evidence__edge_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "edge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "visionkb:e-<sha1>",
+              "title": "Edge Id"
+            },
+            "description": "visionkb:e-<sha1>"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 1,
+              "description": "rows to return (default 50, capped at 200)",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "rows to return (default 50, capped at 200)"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_Evidence_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/gene-sets": {
+      "get": {
+        "tags": [
+          "graph"
+        ],
+        "summary": "Get Gene Set",
+        "description": "Genes expressed in a cell type/state, or genes associated with a disease/phenotype.",
+        "operationId": "get_gene_set_v1_gene_sets_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "entity",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "CL, CellState (visionkb:cs-...), MONDO or HP CURIE",
+              "title": "Entity"
+            },
+            "description": "CL, CellState (visionkb:cs-...), MONDO or HP CURIE"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "expressed",
+                    "disease_genes"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "default: expressed for CL/CellState, disease_genes for MONDO/HP",
+              "title": "Kind"
+            },
+            "description": "default: expressed for CL/CellState, disease_genes for MONDO/HP"
+          },
+          {
+            "name": "dataset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "restrict expression evidence to one dataset",
+              "title": "Dataset"
+            },
+            "description": "restrict expression evidence to one dataset"
+          },
+          {
+            "name": "min_pct",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "maximum": 1.0,
+                  "minimum": 0.0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Pct"
+            }
+          },
+          {
+            "name": "descendants",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "include subclass_of descendants (up to 3 hops)",
+              "default": true,
+              "title": "Descendants"
+            },
+            "description": "include subclass_of descendants (up to 3 hops)"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 1,
+              "description": "rows to return (default 50, capped at 200)",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "rows to return (default 50, capped at 200)"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_list_GeneSetItem__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/atlas/expression": {
+      "get": {
+        "tags": [
+          "atlas"
+        ],
+        "summary": "Atlas Expression",
+        "description": "Rows of `summaries/expr_summary.parquet` (all genes x groups, no threshold), read with DuckDB.",
+        "operationId": "atlas_expression_v1_atlas_expression_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "genes",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "gene CURIEs or symbols, comma-separated or repeated; at most 20",
+              "title": "Genes"
+            },
+            "description": "gene CURIEs or symbols, comma-separated or repeated; at most 20"
+          },
+          {
+            "name": "dataset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dataset"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "majorclass",
+                "celltype",
+                "region_majorclass"
+              ],
+              "type": "string",
+              "default": "majorclass",
+              "title": "Level"
+            }
+          },
+          {
+            "name": "cell_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "cell_type_id CURIE or group label",
+              "title": "Cell Type"
+            },
+            "description": "cell_type_id CURIE or group label"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "pseudobulk_cp10k",
+                "mean_log1p_cp10k",
+                "pct_expressing",
+                "n_cells"
+              ],
+              "type": "string",
+              "default": "pseudobulk_cp10k",
+              "title": "Sort"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 1,
+              "description": "rows to return (default 50, capped at 200)",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "rows to return (default 50, capped at 200)"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_list_ExpressionRow__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/datasets": {
+      "get": {
+        "tags": [
+          "atlas"
+        ],
+        "summary": "Get Datasets",
+        "description": "Registry records (\u00a74) with `bind` for AiScientist. Paths in records are metadata; the API never opens them.",
+        "operationId": "get_datasets_v1_datasets_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "entities",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "CURIEs: cell types/states, genes, tissue, disease, assay",
+              "title": "Entities"
+            },
+            "description": "CURIEs: cell types/states, genes, tissue, disease, assay"
+          },
+          {
+            "name": "species",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Species"
+            }
+          },
+          {
+            "name": "tissue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tissue"
+            }
+          },
+          {
+            "name": "assay",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assay"
+            }
+          },
+          {
+            "name": "disease",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Disease"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 1,
+              "description": "rows to return (default 50, capped at 200)",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "rows to return (default 50, capped at 200)"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_list_DatasetHit__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/proposals": {
+      "post": {
+        "tags": [
+          "proposals"
+        ],
+        "summary": "Post Proposal",
+        "description": "Queue a KGX-style edge for curation with status `proposed`. Never written to Neo4j.",
+        "operationId": "post_proposal_v1_proposals_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ProposalCreated_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "proposals"
+        ],
+        "summary": "List Proposals",
+        "description": "Proposals in the curation queue, newest first.",
+        "operationId": "list_proposals_v1_proposals_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "proposed",
+                    "accepted",
+                    "rejected",
+                    "withdrawn"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 1,
+              "description": "rows to return (default 50, capped at 200)",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "rows to return (default 50, capped at 200)"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 10000,
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DatasetHit": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "bind": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Bind"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "matched": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Matched"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "id",
+          "bind",
+          "score",
+          "matched"
+        ],
+        "title": "DatasetHit"
+      },
+      "EntityDetail": {
+        "properties": {
+          "node": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Node"
+          },
+          "degree_by_predicate": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Degree By Predicate"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "node",
+          "degree_by_predicate"
+        ],
+        "title": "EntityDetail"
+      },
+      "EntityHit": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "category": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Category"
+          },
+          "symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Symbol"
+          },
+          "synonyms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Synonyms"
+          },
+          "match": {
+            "type": "string",
+            "enum": [
+              "exact_id",
+              "exact_symbol",
+              "synonym",
+              "fulltext"
+            ],
+            "title": "Match"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "id",
+          "category",
+          "match",
+          "score"
+        ],
+        "title": "EntityHit"
+      },
+      "Envelope_EntityDetail_": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "kg_release": {
+            "type": "string",
+            "title": "Kg Release"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EntityDetail"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "kg_release"
+        ],
+        "title": "Envelope[EntityDetail]"
+      },
+      "Envelope_Evidence_": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "kg_release": {
+            "type": "string",
+            "title": "Kg Release"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Evidence"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "kg_release"
+        ],
+        "title": "Envelope[Evidence]"
+      },
+      "Envelope_Health_": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "kg_release": {
+            "type": "string",
+            "title": "Kg Release"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Health"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "kg_release"
+        ],
+        "title": "Envelope[Health]"
+      },
+      "Envelope_ProposalCreated_": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "kg_release": {
+            "type": "string",
+            "title": "Kg Release"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProposalCreated"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "kg_release"
+        ],
+        "title": "Envelope[ProposalCreated]"
+      },
+      "Envelope_list_DatasetHit__": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "kg_release": {
+            "type": "string",
+            "title": "Kg Release"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DatasetHit"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "kg_release"
+        ],
+        "title": "Envelope[list[DatasetHit]]"
+      },
+      "Envelope_list_EntityHit__": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "kg_release": {
+            "type": "string",
+            "title": "Kg Release"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/EntityHit"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "kg_release"
+        ],
+        "title": "Envelope[list[EntityHit]]"
+      },
+      "Envelope_list_ExpressionRow__": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "kg_release": {
+            "type": "string",
+            "title": "Kg Release"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ExpressionRow"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "kg_release"
+        ],
+        "title": "Envelope[list[ExpressionRow]]"
+      },
+      "Envelope_list_GeneSetItem__": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "kg_release": {
+            "type": "string",
+            "title": "Kg Release"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/GeneSetItem"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "kg_release"
+        ],
+        "title": "Envelope[list[GeneSetItem]]"
+      },
+      "Envelope_list_Relationship__": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "title": "Status"
+          },
+          "kg_release": {
+            "type": "string",
+            "title": "Kg Release"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Relationship"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "kg_release"
+        ],
+        "title": "Envelope[list[Relationship]]"
+      },
+      "ErrorInfo": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorInfo"
+      },
+      "Evidence": {
+        "properties": {
+          "edge": {
+            "$ref": "#/components/schemas/Relationship"
+          },
+          "study_results": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Study Results"
+          },
+          "publications": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Publications"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "edge",
+          "study_results",
+          "publications"
+        ],
+        "title": "Evidence"
+      },
+      "ExpressionRow": {
+        "properties": {
+          "dataset_id": {
+            "type": "string",
+            "title": "Dataset Id"
+          },
+          "atlas_version": {
+            "type": "string",
+            "title": "Atlas Version"
+          },
+          "dataset_version": {
+            "type": "string",
+            "title": "Dataset Version"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "group_label": {
+            "type": "string",
+            "title": "Group Label"
+          },
+          "cell_type_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cell Type Id"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "gene_id": {
+            "type": "string",
+            "title": "Gene Id"
+          },
+          "gene_symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gene Symbol"
+          },
+          "n_cells": {
+            "type": "integer",
+            "title": "N Cells"
+          },
+          "n_donors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Donors"
+          },
+          "n_expressing": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Expressing"
+          },
+          "pct_expressing": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pct Expressing"
+          },
+          "mean_log1p_cp10k": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Log1P Cp10K"
+          },
+          "pseudobulk_cp10k": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pseudobulk Cp10K"
+          },
+          "n_donors_expressing": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Donors Expressing"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "dataset_id",
+          "atlas_version",
+          "dataset_version",
+          "level",
+          "group_label",
+          "gene_id",
+          "n_cells"
+        ],
+        "title": "ExpressionRow"
+      },
+      "GeneSetItem": {
+        "properties": {
+          "gene_id": {
+            "type": "string",
+            "title": "Gene Id"
+          },
+          "symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Symbol"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Evidence"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "gene_id",
+          "evidence"
+        ],
+        "title": "GeneSetItem"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Health": {
+        "properties": {
+          "neo4j": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Neo4J"
+          },
+          "summaries": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Summaries"
+          },
+          "postgres": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Postgres"
+          },
+          "release": {
+            "type": "string",
+            "title": "Release"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "neo4j",
+          "summaries",
+          "postgres",
+          "release",
+          "version"
+        ],
+        "title": "Health"
+      },
+      "NodeRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "category": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Category"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "NodeRef"
+      },
+      "Page": {
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "limit",
+          "offset"
+        ],
+        "title": "Page"
+      },
+      "ProposalCreated": {
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "title": "Proposal Id"
+          },
+          "status": {
+            "type": "string",
+            "const": "proposed",
+            "title": "Status"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created",
+            "description": "false if the same run_id already proposed this edge"
+          }
+        },
+        "type": "object",
+        "required": [
+          "proposal_id",
+          "status",
+          "created"
+        ],
+        "title": "ProposalCreated"
+      },
+      "ProposalIn": {
+        "properties": {
+          "edge": {
+            "$ref": "#/components/schemas/ProposedEdge"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Evidence"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id",
+            "examples": [
+              "aiscientist-run-0001"
+            ]
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "lab",
+              "public"
+            ],
+            "title": "Visibility",
+            "default": "owner"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "edge",
+          "run_id"
+        ],
+        "title": "ProposalIn"
+      },
+      "ProposedEdge": {
+        "properties": {
+          "subject": {
+            "type": "string",
+            "title": "Subject",
+            "examples": [
+              "HGNC:16665"
+            ]
+          },
+          "predicate": {
+            "type": "string",
+            "title": "Predicate",
+            "examples": [
+              "biolink:expressed_in"
+            ]
+          },
+          "object": {
+            "type": "string",
+            "title": "Object",
+            "examples": [
+              "CL:0000115"
+            ]
+          },
+          "knowledge_level": {
+            "type": "string",
+            "title": "Knowledge Level",
+            "examples": [
+              "observation"
+            ]
+          },
+          "agent_type": {
+            "type": "string",
+            "title": "Agent Type",
+            "examples": [
+              "data_analysis_pipeline"
+            ]
+          },
+          "primary_knowledge_source": {
+            "type": "string",
+            "title": "Primary Knowledge Source",
+            "default": "infores:visionkb-aiscientist"
+          },
+          "publications": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Publications"
+          },
+          "qualifiers": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Qualifiers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "subject",
+          "predicate",
+          "object",
+          "knowledge_level",
+          "agent_type"
+        ],
+        "title": "ProposedEdge",
+        "description": "KGX-style edge. Qualifiers may be given flat (KGX) or under ``qualifiers``."
+      },
+      "Relationship": {
+        "properties": {
+          "edge_id": {
+            "type": "string",
+            "title": "Edge Id"
+          },
+          "subject": {
+            "$ref": "#/components/schemas/NodeRef"
+          },
+          "predicate": {
+            "type": "string",
+            "title": "Predicate"
+          },
+          "object": {
+            "$ref": "#/components/schemas/NodeRef"
+          },
+          "qualifiers": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Qualifiers"
+          },
+          "knowledge_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Knowledge Level"
+          },
+          "agent_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Type"
+          },
+          "primary_knowledge_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Knowledge Source"
+          },
+          "publications": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Publications",
+            "description": "at most 5; see n_publications"
+          },
+          "n_publications": {
+            "type": "integer",
+            "title": "N Publications",
+            "default": 0
+          },
+          "evidence_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Count"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "edge_id",
+          "subject",
+          "predicate",
+          "object"
+        ],
+        "title": "Relationship"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "description": "Token from VISIONKB_API_TOKENS_FILE",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

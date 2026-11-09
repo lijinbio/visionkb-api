@@ -1,0 +1,173 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FIXTURE_RELEASE: visionkb-2026.11.0-fixture
+  NEO4J_IMAGE: neo4j:2026.10.1-community
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --locked
+      - run: uv run ruff check --output-format=github .
+      - run: uv run ruff format --check .
+      - name: OpenAPI document up to date
+        run: |
+          uv run visionkb-api openapi --out "$RUNNER_TEMP/openapi.json"
+          diff -u docs/openapi.json "$RUNNER_TEMP/openapi.json"
+      - name: Audit dependencies
+        run: |
+          uv export --locked --no-emit-project > requirements-audit.txt
+          uvx pip-audit --strict --disable-pip -r requirements-audit.txt
+
+  test:
+    name: Test (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - run: uv sync --locked
+      - run: uv run pytest -rs
+
+  integration:
+    # Live Neo4j and PostgreSQL as service containers; the fixture release is imported with
+    # neo4j-admin into the Neo4j service's data volume, then post_import.cypher runs.
+    name: Integration (Neo4j + PostgreSQL)
+    runs-on: ubuntu-latest
+    env:
+      NEO4J_PW: ci-${{ github.run_id }}-${{ github.run_attempt }}
+      PG_PW: ci-${{ github.run_id }}-${{ github.run_attempt }}
+    services:
+      neo4j:
+        image: neo4j:2026.10.1-community
+        env:
+          NEO4J_AUTH: neo4j/ci-${{ github.run_id }}-${{ github.run_attempt }}
+          NEO4J_server_memory_heap_max__size: 1G
+          NEO4J_server_fleet__discovery_enabled: "false"
+          NEO4J_dbms_fleet__manager_enabled: "false"
+          NEO4J_dbms_usage__report_enabled: "false"
+        ports: ["7687:7687"]
+        volumes: ["neo4j-data:/data"]
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_PASSWORD: ci-${{ github.run_id }}-${{ github.run_attempt }}
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --locked
+      - name: Fixture release
+        run: uv run python tests/fixtures/make_fixture.py --out "$RUNNER_TEMP/fixtures"
+      - name: Import the fixture with neo4j-admin
+        run: |
+          docker stop "${{ job.services.neo4j.id }}"
+          docker run --rm -v neo4j-data:/data \
+            -v "$RUNNER_TEMP/fixtures/$FIXTURE_RELEASE/neo4j-import:/import:ro" -w /import "$NEO4J_IMAGE" \
+            neo4j-admin database import full neo4j --overwrite-destination=true @/import/import.args
+          docker start "${{ job.services.neo4j.id }}"
+      - name: Wait for Neo4j, run post_import.cypher
+        run: |
+          id="${{ job.services.neo4j.id }}"
+          for i in $(seq 1 60); do
+            docker exec -e NEO4J_PASSWORD="$NEO4J_PW" "$id" cypher-shell -u neo4j "RETURN 1" >/dev/null 2>&1 && break
+            sleep 3
+          done
+          docker exec -i -e NEO4J_PASSWORD="$NEO4J_PW" "$id" cypher-shell -u neo4j \
+            < "$RUNNER_TEMP/fixtures/$FIXTURE_RELEASE/neo4j-import/post_import.cypher"
+          docker exec -e NEO4J_PASSWORD="$NEO4J_PW" "$id" cypher-shell -u neo4j "MATCH (n) RETURN count(n) AS nodes"
+      - name: Secrets as files
+        run: |
+          umask 077
+          printf '%s\n' "$NEO4J_PW" > "$RUNNER_TEMP/neo4j_password"
+          printf 'postgresql://postgres:%s@127.0.0.1:5432/postgres\n' "$PG_PW" > "$RUNNER_TEMP/pg_dsn"
+      - name: pytest (unit + integration)
+        env:
+          VISIONKB_IT: "1"
+          NEO4J_URI: bolt://127.0.0.1:7687
+          NEO4J_USER: neo4j
+        run: |
+          export NEO4J_PASSWORD_FILE="$RUNNER_TEMP/neo4j_password" VISIONKB_PG_DSN_FILE="$RUNNER_TEMP/pg_dsn"
+          export VISIONKB_TEST_RELEASE_DIR="$RUNNER_TEMP/fixtures/$FIXTURE_RELEASE"
+          uv run pytest -rs
+
+  install:
+    # Users install with pip, not uv: check that route from a clean interpreter.
+    name: Install with pip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install .
+      - run: visionkb-api --version
+      - run: visionkb-api openapi | python -c 'import json, sys; assert "/v1/relationships" in json.load(sys.stdin)["paths"]'
+
+  container:
+    name: Container (build + smoke test, no push)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --locked
+      - name: Fixture release
+        run: uv run python tests/fixtures/make_fixture.py --out "$RUNNER_TEMP/fixtures"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          load: true
+          tags: visionkb-api:ci
+      - name: Smoke test (read-only root, release mounted read-only, no databases)
+        run: |
+          mkdir -p "$RUNNER_TEMP/secrets"
+          tok="$(openssl rand -hex 16)"
+          printf '%s\tread\n' "$tok" > "$RUNNER_TEMP/secrets/tokens.tsv"
+          chmod 644 "$RUNNER_TEMP/secrets/tokens.tsv"
+          docker run -d --name api --read-only --tmpfs /tmp -p 8770:8770 --health-interval 2s \
+            -v "$RUNNER_TEMP/fixtures/$FIXTURE_RELEASE:/release:ro" -v "$RUNNER_TEMP/secrets:/run/secrets:ro" \
+            -e VISIONKB_API_TOKENS_FILE=/run/secrets/tokens.tsv visionkb-api:ci
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8770/v1/health >/dev/null && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8770/v1/health | tee /dev/stderr | python3 -c '
+          import json, os, sys
+          b = json.load(sys.stdin)
+          assert b["status"] == "ok" and b["kg_release"] == os.environ["FIXTURE_RELEASE"], b
+          assert b["data"]["summaries"]["status"] == "ok", b'
+          curl -fsS -H "Authorization: Bearer $tok" "http://127.0.0.1:8770/v1/atlas/expression?genes=RHO" | python3 -c '
+          import json, sys
+          b = json.load(sys.stdin)
+          assert b["data"][0]["gene_symbol"] == "RHO" and b["data"][0]["group_label"] == "Rod", b'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8770/v1/release)" = 401
+          for i in $(seq 1 30); do s="$(docker inspect -f '{{.State.Health.Status}}' api)"; [ "$s" = healthy ] && break; sleep 2; done
+          echo "health: $s"; test "$s" = healthy
+          test "$(docker run --rm visionkb-api:ci id -u)" = 10001
+          docker run --rm visionkb-api:ci python -c 'import visionkb_api; print(visionkb_api.__version__)'
+      - if: always()
+        run: docker logs api || true
