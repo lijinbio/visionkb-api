@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 # CP10k. Same +1 offset as the log1p(CP10k) scale of the summaries (mean_log1p_cp10k); keeps the ratio finite and
-# damps ratios of low-abundance genes. Sensitivity on visionkb-2026.11.0 (HRCA snRNA Rod, 5477 D18 candidates) is in
-# the CHANGELOG (0.1.3): the leading rod markers and MALAT1's demotion hold at 0.01, 0.1 and 1.
+# damps ratios of low-abundance genes. Measured on visionkb-2026.11.0 summaries (HRCA snRNA Rod majorclass, 5477 genes
+# meeting D18; CHANGELOG 0.1.3): MALAT1 (1st by pct) is demoted at all three pseudocounts tried (rank 4533 at 0.01,
+# 4665 at 0.1, 5170 at 1). Rod markers lead at 1 (PDE6A 1st, SAG 2nd) and at 0.1 (PDE6A 1st, then lncRNA/clone genes
+# 2nd-3rd); at 0.01 low-abundance lncRNA/clone genes lead (AC130415.1, AC104938.1 first; PDE6A 6th).
 PSEUDOCOUNT = 1.0
 SCORE_DEFINITION = (
     "score = specificity of the gene's best supporting StudyResult = (pseudobulk_cp10k of that group + 1) / "
