@@ -146,8 +146,8 @@ def test_search_hostile_input(client, q):
 def test_entity(client):
     d = ok(client.get(f"/v1/entities/{RHO}", headers=auth()))["data"]
     assert d["node"]["symbol"] == "RHO" and "ENSEMBL:ENSG00000163914" in d["node"]["xref"]
-    # Rod, Cone and the two cone CellStates (fixture: pct >= 0.10, n_cells >= 20)
-    assert d["degree_by_predicate"]["biolink:expressed_in"]["out"] == 4
+    # Rod and the two cone CellStates; RHO->Cone (majorclass) fails D18 rule (b) specificity
+    assert d["degree_by_predicate"]["biolink:expressed_in"]["out"] == 3
     assert d["degree_by_predicate"]["biolink:gene_associated_with_condition"]["out"] == 1
     err(client.get("/v1/entities/HGNC:99999999", headers=auth()), 400, "invalid_curie")
     err(client.get("/v1/entities/HGNC:999999", headers=auth()), 404, "not_found")
@@ -155,9 +155,9 @@ def test_entity(client):
 
 def test_relationships(client):
     b = ok(client.get("/v1/relationships", params={"subject": RHO}, headers=auth()))
-    assert b["page"]["total"] == 5
+    assert b["page"]["total"] == 4
     preds = sorted(e["predicate"] for e in b["data"])
-    assert preds == ["biolink:expressed_in"] * 4 + ["biolink:gene_associated_with_condition"]
+    assert preds == ["biolink:expressed_in"] * 3 + ["biolink:gene_associated_with_condition"]
     e = next(e for e in b["data"] if e["object"]["id"] == ROD)
     assert e["qualifiers"] == {
         "anatomical_context_qualifier": "UBERON:0000966",
@@ -225,6 +225,11 @@ def test_evidence(client):
     assert d["publications"] == ["PMID:2137202"] and d["study_results"][0]["pmid"] == "PMID:2137202"
     assert len(d["study_results"][0]["supporting_text"]) <= 300
     err(client.get("/v1/evidence/visionkb:e-" + "0" * 40, headers=auth()), 404, "not_found")
+    # A StudyResult in a group flagged by known issue KI-1 (fixture: hrca-snrna MG) is tagged and warned about.
+    rels = ok(client.get("/v1/relationships", params={"subject": "HGNC:10024", "object": MG}, headers=auth()))["data"]
+    b = ok(client.get(f"/v1/evidence/{rels[0]['edge_id']}", headers=auth()))
+    assert b["data"]["study_results"][0]["known_issues"] == ["KI-1"]
+    assert any(w.startswith("KI-1 (") and "visionkb:ds-hrca-snrna|MG (Rod program)" in w for w in b["warnings"])
 
 
 def test_gene_sets(client):
@@ -243,7 +248,10 @@ def test_gene_sets(client):
     b = ok(client.get("/v1/gene-sets", params={"entity": ROD, "dataset": "visionkb:ds-rpe-scrna"}, headers=auth()))
     assert b["data"] == []
     b = ok(client.get("/v1/gene-sets", params={"entity": "CL:0000115", "min_pct": 0.05}, headers=auth()))
-    assert any("lower thresholds" in w for w in b["warnings"])
+    assert any("below the edge rule's pct_expressing >= 0.1" in w for w in b["warnings"])
+    rule = [w for w in b["warnings"] if w.startswith("expressed_in edges exist only where")]
+    assert rule and "pseudobulk_cp10k >= 0.1 x the gene's max" in rule[0] and "n_donors_expressing >= 2" in rule[0]
+    assert "(decision D18)" in rule[0] and "D8" not in rule[0]
     assert {g["symbol"] for g in b["data"]} == {"APLN", "PECAM1"}  # rpe Endo only: hrca Endo has 15 cells < 20
     # Disease genes, through MONDO descendants: RP -> RP4 -> RHO.
     b = ok(client.get("/v1/gene-sets", params={"entity": RP}, headers=auth()))

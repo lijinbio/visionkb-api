@@ -126,7 +126,23 @@ PROFILE = {
     "PECAM1": {"Endo": 0.93},
 }
 CELLTYPE_ADJ = {("ARR3", "S_Cone"): 0.80, ("ABCA4", "S_Cone"): 0.40, ("RHO", "fovea|Cone"): 0.12}
-THRESH_PCT, THRESH_CELLS = 0.10, 20
+# Expression edge rule D18 (recorded in manifest.json expression_edge_rule): (a) pct >= 0.10 and n_cells >= 20,
+# (b) pseudobulk_cp10k >= 0.10 x the gene's max over groups of the same dataset and level, (c) n_donors_expressing >= 2;
+# majorclass and celltype levels only.
+EDGE_RULE = {
+    "decision": "D18",
+    "levels": ["majorclass", "celltype"],
+    "min_pct_expressing": 0.1,
+    "min_n_cells": 20,
+    "specificity_fraction": 0.1,
+    "min_n_donors_expressing": 2,
+}
+# Synthetic donor support: one group expresses the gene in a single donor only (fails rule c).
+DONOR_ADJ = {("ABCA4", "S_Cone"): 1}
+# Synthetic known issue KI-1 (shape of the real validation/known_issues.json): one flagged group.
+KI1_PAIRS = [
+    {"dataset_id": "visionkb:ds-hrca-snrna", "group_label": "MG", "group_majorclass": "MG", "program_of": "Rod"}
+]
 
 
 def sha1(text: str) -> str:
@@ -171,10 +187,35 @@ def summary_rows() -> list[dict]:
                         "pct_expressing": round(n_exp / n_cells, 6),
                         "mean_log1p_cp10k": round(2.6 * pct, 6),
                         "pseudobulk_cp10k": round(180.0 * pct * pct, 6),
-                        "n_donors_expressing": ds["n_donors"] if pct >= 0.3 else (1 if pct >= 0.1 else 0),
+                        "n_donors_expressing": DONOR_ADJ.get(
+                            (sym, label),
+                            ds["n_donors"] if pct >= 0.3 else (2 if pct >= 0.1 else (1 if pct >= 0.05 else 0)),
+                        ),
                     }
                 )
     return rows
+
+
+def edge_reasons(rows: list[dict]) -> list[str | None]:
+    """Per summary row: None if it becomes an expressed_in StudyResult under EDGE_RULE, else the first failing rule."""
+    r = EDGE_RULE
+    gmax: dict[tuple, float] = {}
+    for x in rows:
+        k = (x["dataset_id"], x["level"], x["gene_id"])
+        gmax[k] = max(gmax.get(k, 0.0), x["pseudobulk_cp10k"])
+    out: list[str | None] = []
+    for x in rows:
+        if x["level"] not in r["levels"]:
+            out.append("level_not_in_graph")
+        elif x["pct_expressing"] < r["min_pct_expressing"] or x["n_cells"] < r["min_n_cells"]:
+            out.append("a_pct_or_n_cells")
+        elif x["pseudobulk_cp10k"] < r["specificity_fraction"] * gmax[(x["dataset_id"], x["level"], x["gene_id"])]:
+            out.append("b_specificity")
+        elif x["n_donors_expressing"] < r["min_n_donors_expressing"]:
+            out.append("c_donors")
+        else:
+            out.append(None)
+    return out
 
 
 def build_graph(rows: list[dict]) -> tuple[list[dict], list[dict]]:
@@ -273,8 +314,8 @@ def build_graph(rows: list[dict]) -> tuple[list[dict], list[dict]]:
     # Expression: one edge per (gene, cell type, tissue, species); one StudyResult per dataset group.
     tissue = {ds["id"]: ds["tissue"][0] for ds in DATASETS}
     by_edge: dict[str, dict] = {}
-    for r in rows:
-        if r["level"] == "region_majorclass" or r["pct_expressing"] < THRESH_PCT or r["n_cells"] < THRESH_CELLS:
+    for r, why in zip(rows, edge_reasons(rows), strict=True):
+        if why is not None:
             continue
         quals = {"anatomical_context_qualifier": tissue[r["dataset_id"]], "species_context_qualifier": HUMAN}
         eid = edge_id(r["gene_id"], "biolink:expressed_in", r["cell_type_id"], quals)
@@ -557,7 +598,26 @@ def make(out_root: Path, release: str = RELEASE) -> Path:
         "".join(json.dumps(r, sort_keys=True) + "\n" for r in registry(rows)), encoding="utf-8"
     )
     (rel / "validation").mkdir()
-    report = {"kg_release": release, "status": "pass", "n_errors": 0, "n_warnings": 0, "note": "synthetic fixture"}
+    reasons = edge_reasons(rows)
+    exclusions = {k: reasons.count(k) for k in ("level_not_in_graph", "a_pct_or_n_cells", "b_specificity", "c_donors")}
+    exclusions["kept_study_results"] = reasons.count(None)
+    report = {
+        "kg_release": release,
+        "status": "pass",
+        "n_errors": 0,
+        "n_warnings": 0,
+        "note": "synthetic fixture",
+        "expression_edge_rule_exclusions": exclusions,
+    }
+    ki = {
+        "id": "KI-1",
+        "title": "cross-lineage marker programs in cell-type groups (SYNTHETIC FIXTURE)",
+        "method": "synthetic fixture record with the shape of the real known_issues.json",
+        "n_groups": len(KI1_PAIRS),
+        "n_pairs": len(KI1_PAIRS),
+        "pairs": KI1_PAIRS,
+    }
+    (rel / "validation/known_issues.json").write_text(json.dumps(ki, indent=1) + "\n")
     (rel / "validation/report.json").write_text(json.dumps(report, indent=1) + "\n")
     (rel / "validation/report.md").write_text(f"# Validation {release}\n\nSynthetic fixture: no checks run.\n")
     counts_nodes: dict[str, int] = {}
@@ -599,6 +659,19 @@ def make(out_root: Path, release: str = RELEASE) -> Path:
             "study_results": counts_nodes.get("biolink:StudyResult", 0),
         },
         "validation": {"status": "pass", "n_errors": 0, "n_warnings": 0},
+        "expression_edge_rule": dict(EDGE_RULE, donor_support_checked={d["id"]: True for d in DATASETS}),
+        "known_issues": [
+            {
+                "id": "KI-1",
+                "title": ki["title"],
+                "status": "open; report only (synthetic fixture)",
+                "n_groups": ki["n_groups"],
+                "n_pairs": ki["n_pairs"],
+                "details": "validation/known_issues.json",
+                "section": "validation/report.md#known-issues",
+                "rod_program_groups": [f"{p['dataset_id']}|{p['group_label']}" for p in KI1_PAIRS],
+            }
+        ],
         "files": files,
     }
     (rel / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")

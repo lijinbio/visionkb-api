@@ -5,6 +5,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); ver
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-09
+
+### Changed
+
+- The expression edge rule is read from the release manifest (`expression_edge_rule`, decision D18:
+  pct_expressing >= 0.10 and n_cells >= 20; pseudobulk_cp10k >= 0.10 x the gene's max in the same dataset
+  and level; n_donors_expressing >= 2; majorclass/celltype only). `/v1/gene-sets` quotes it in a warning on
+  every `kind=expressed` answer and compares `min_pct` with the manifest value; releases without the field
+  fall back to the D8 text, labelled as such. No hard-coded D8 text remains.
+- The test fixture builds its edges with D18 (15 `expressed_in` edges; RHO->Cone fails rule b, ABCA4->S_Cone
+  rule c), records `expression_edge_rule`, a synthetic KI-1 and per-rule exclusion counts
+  (`validation/report.json` `expression_edge_rule_exclusions`).
+
+### Added
+
+- `/v1/release` returns `expression_edge_rule`, `expression_edge_rule_text`, `known_issues` and
+  `n_known_issue_groups`.
+- Known-issue groups (from each manifest `known_issues` entry's `details` file `pairs`, else its
+  `*_groups` list): `/v1/atlas/expression` rows and `/v1/evidence` StudyResults in a flagged
+  (dataset_id, group_label) carry `known_issues: [ids]`, with one warning per issue. Flagged groups are
+  cell-type groups: `celltype` rows match by label, `majorclass` rows only when the flagged group is that
+  whole major class (pair `group_majorclass` == label; 11 of the 47 KI-1 groups in `visionkb-2026.11.0`),
+  `region_majorclass` rows never.
+
 ## [0.1.1] - 2026-11-09
 
 ### Added

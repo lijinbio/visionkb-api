@@ -78,7 +78,9 @@ SECTIONS = [
         "Release",
         "GET /v1/release",
         "Subset of `manifest.json` (§6): release id, Biolink version, code versions, sources (provenance "
-        "fields only), atlases, counts, validation, bundle checks, and the Biolink predicates present in the graph.",
+        "fields only), atlases, counts, validation, `expression_edge_rule` (+ `expression_edge_rule_text`), "
+        "`known_issues` (ids, titles, status, counts) and `n_known_issue_groups`, bundle checks, and the Biolink "
+        "predicates present in the graph.",
         [("GET", "/v1/release", None)],
     ),
     (
@@ -125,9 +127,11 @@ SECTIONS = [
         "GET /v1/gene-sets?entity=&kind=&dataset=&min_pct=&descendants=&limit=&offset=",
         "`kind=expressed` (default for CL / CellState): genes with `expressed_in` edges to the entity, or to "
         "its `subclass_of` descendants up to 3 hops (`descendants=false` to switch off), scored by max "
-        "`pct_expressing`; with `dataset`, only StudyResults of that dataset count. The KG holds expression "
-        "edges only where pct_expressing >= 0.10 and n_cells >= 20 (decision D8); lower thresholds need "
-        "`/v1/atlas/expression`. `kind=disease_genes` (default for MONDO / HP): genes with "
+        "`pct_expressing`; with `dataset`, only StudyResults of that dataset count. Expression edges follow the "
+        "release's `expression_edge_rule` (manifest; D18: pct_expressing >= 0.10 and n_cells >= 20, pseudobulk "
+        ">= 0.10 x the gene's max in the same dataset and level, n_donors_expressing >= 2; majorclass/celltype "
+        "only), quoted in a warning on every `kind=expressed` answer (older releases without the field: D8 text); "
+        "the full gene x group table is `/v1/atlas/expression`. `kind=disease_genes` (default for MONDO / HP): genes with "
         "`gene_associated_with_condition`, `causes`, `contributes_to`, `genetically_associated_with`, "
         "`has_phenotype` or `associated_with` edges to the entity or its descendants, scored by edge count.",
         [
@@ -140,10 +144,12 @@ SECTIONS = [
         "GET /v1/atlas/expression?genes=&dataset=&level=&cell_type=&sort=&limit=&offset=",
         "Rows of `summaries/expr_summary.parquet` (§3: every gene x group, no threshold) read with DuckDB. "
         "`genes`: up to 20 gene CURIEs or symbols (case-insensitive), comma-separated or repeated; unknown "
-        "names are listed in `warnings`. `level`: `majorclass` (default), `celltype`, `region_majorclass`. "
+        "names are listed in `warnings`. Rows in a group flagged by a manifest known issue (e.g. KI-1, "
+        '`validation/known_issues.json`) carry `known_issues: ["KI-1"]` and one warning per issue; evidence '
+        "StudyResults are tagged the same way. `level`: `majorclass` (default), `celltype`, `region_majorclass`. "
         "`cell_type`: a `cell_type_id` or a group label. `sort` (descending): `pseudobulk_cp10k` (default), "
         "`mean_log1p_cp10k`, `pct_expressing`, `n_cells`.",
-        [("GET", "/v1/atlas/expression?genes=RHO,APLN&limit=3", None)],
+        [("GET", "/v1/atlas/expression?genes=RLBP1&limit=3", None)],
     ),
     (
         "find_datasets",

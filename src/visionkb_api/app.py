@@ -46,7 +46,6 @@ from .vocab import (
 
 log = logging.getLogger("visionkb_api")
 MAX_BODY_BYTES = 64 * 1024
-KG_EXPRESSION_THRESHOLD = "pct_expressing >= 0.10 and n_cells >= 20 (decision D8)"
 GENE_SET_PREFIXES = ("CL:", "visionkb:cs-", "MONDO:", "HP:")
 Limit = Annotated[int, Query(ge=1, le=10_000, description="rows to return (default 50, capped at 200)")]
 Offset = Annotated[int, Query(ge=0, le=MAX_OFFSET)]
@@ -174,6 +173,32 @@ def _split(values: list[str] | None) -> list[str]:
 def _err(st: State | None, status: int, code: str, message: str) -> JSONResponse:
     rel = st.kg_release if st else "unknown"
     return JSONResponse(envelope(rel, None, error={"code": code, "message": message}), status_code=status)
+
+
+def tag_known_issues(rows: list[dict], release: Release, warnings: list[str], what: str) -> None:
+    """Add ``known_issues: [ids]`` to rows whose (dataset_id, group_label) a manifest known issue flags,
+    and one warning per issue id naming the groups (at most 10)."""
+    if not release.known_issue_groups:
+        return
+    hits: dict[str, dict[str, str | None]] = {}
+    for row in rows:
+        tags = release.known_issues_for(row.get("dataset_id"), row.get("group_label"), row.get("level"))
+        if tags:
+            row["known_issues"] = sorted({t["id"] for t in tags})
+            for t in tags:
+                hits.setdefault(t["id"], {})[f"{row.get('dataset_id')}|{row.get('group_label')}"] = t.get("program_of")
+    titles = {
+        ki.get("id"): ki.get("title") for ki in release.manifest.get("known_issues") or [] if isinstance(ki, dict)
+    }
+    for ki_id, groups in sorted(hits.items()):
+        n = sum(1 for r in rows if ki_id in r.get("known_issues", []))
+        listed = ", ".join(f"{g} ({p} program)" if p else g for g, p in list(groups.items())[:10])
+        more = f" and {len(groups) - 10} more" if len(groups) > 10 else ""
+        title = f" ({titles[ki_id]})" if titles.get(ki_id) else ""
+        warnings.append(
+            f"{ki_id}{title}: {n} of {len(rows)} returned {what} are in flagged groups: {listed}{more}; "
+            "see /v1/release known_issues"
+        )
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -431,6 +456,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 if pmid not in pubs:
                     pubs.append(pmid)
         edge["publications"] = edge["publications"][:5]
+        tag_known_issues(srs, ctx.st.release, ctx.warnings, "study results")
         data = {"edge": edge, "study_results": srs, "publications": pubs}
         return ctx.respond(data, page={"limit": n, "offset": offset, "total": total})
 
@@ -458,10 +484,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             dataset = _curie(dataset, "dataset")
             if k != "expressed":
                 ctx.warnings.append("dataset applies to kind=expressed only; ignored")
-        if k == "expressed" and min_pct is not None and min_pct < 0.10:
+        rel = ctx.st.release
+        if k == "expressed" and min_pct is not None and min_pct < rel.min_pct_for_edges:
             ctx.warnings.append(
-                f"the KG holds expressed_in edges only where {KG_EXPRESSION_THRESHOLD}; "
-                "use /v1/atlas/expression for lower thresholds"
+                f"min_pct {min_pct} is below the edge rule's pct_expressing >= {rel.min_pct_for_edges}: "
+                "lower values cannot add genes; use /v1/atlas/expression for all genes x groups"
             )
         graph = ctx.st.need_graph()
         if not graph.exists([e]).get(e):
@@ -477,11 +504,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             offset=offset,
         )
         ctx.warnings += notes
-        ctx.warnings.append(
-            "score = max pct_expressing over supporting edges"
-            if k == "expressed"
-            else "score = number of supporting gene-condition edges"
-        )
+        if k == "expressed":
+            ctx.warnings.append("score = max pct_expressing over supporting edges")
+            ctx.warnings.append(f"expressed_in edges exist only where {rel.edge_rule_text()}")
+        else:
+            ctx.warnings.append("score = number of supporting gene-condition edges")
         return ctx.respond(rows, page={"limit": n, "offset": offset, "total": total})
 
     # -- atlas and datasets --------------------------------------------------------------------
@@ -523,6 +550,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         rows, total = summ.expression(
             ids, dataset=dataset, level=level, cell_type=cell_type, sort=sort, limit=n, offset=offset
         )
+        tag_known_issues(rows, ctx.st.release, ctx.warnings, "rows")
         return ctx.respond(rows, page={"limit": n, "offset": offset, "total": total})
 
     @app.get("/v1/datasets", tags=["atlas"], dependencies=[read], response_model=Envelope[list[DatasetHit]])

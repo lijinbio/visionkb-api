@@ -66,7 +66,7 @@ HTTP 200
       "schema_version": 1
     },
     "release": "visionkb-0000.01.0",
-    "version": "0.1.1"
+    "version": "0.1.2"
   },
   "page": null,
   "warnings": [],
@@ -108,7 +108,7 @@ HTTP 200
       "schema_version": 1
     },
     "release": "visionkb-0000.01.0",
-    "version": "0.1.1"
+    "version": "0.1.2"
   },
   "page": null,
   "warnings": [],
@@ -140,7 +140,7 @@ HTTP 503
       "detail": "VISIONKB_PG_DSN_FILE is not set"
     },
     "release": "visionkb-0000.01.0",
-    "version": "0.1.1"
+    "version": "0.1.2"
   },
   "page": null,
   "warnings": [
@@ -158,7 +158,7 @@ HTTP 503
 
 `GET /v1/release`
 
-Subset of `manifest.json` (§6): release id, Biolink version, code versions, sources (provenance fields only), atlases, counts, validation, bundle checks, and the Biolink predicates present in the graph.
+Subset of `manifest.json` (§6): release id, Biolink version, code versions, sources (provenance fields only), atlases, counts, validation, `expression_edge_rule` (+ `expression_edge_rule_text`), `known_issues` (ids, titles, status, counts) and `n_known_issue_groups`, bundle checks, and the Biolink predicates present in the graph.
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" "$VISIONKB_API_URL/v1/release"
@@ -182,12 +182,12 @@ HTTP 200
       {
         "dataset_id": "visionkb:ds-hrca-snrna",
         "atlas_version": "heca-2026.05",
-        "summary_sha256": "94d866b1a60a8bfb68c6849904e2ca22f0a069ec40c433e4b1a5e106a11d0d6c"
+        "summary_sha256": "7c8851a8a40e7c750b8f63c2befd63f66680b252a307b5cc22c3aee148cfddf5"
       },
       {
         "dataset_id": "visionkb:ds-rpe-scrna",
         "atlas_version": "heca-2026.05",
-        "summary_sha256": "94d866b1a60a8bfb68c6849904e2ca22f0a069ec40c433e4b1a5e106a11d0d6c"
+        "summary_sha256": "7c8851a8a40e7c750b8f63c2befd63f66680b252a307b5cc22c3aee148cfddf5"
       }
     ],
     "counts": {
@@ -199,21 +199,36 @@ HTTP 200
         "biolink:Gene": 8,
         "biolink:OrganismTaxon": 1,
         "biolink:PhenotypicFeature": 1,
-        "biolink:StudyResult": 19,
+        "biolink:StudyResult": 17,
         "visionkb:CellState": 2
       },
       "edges_by_predicate": {
-        "biolink:expressed_in": 17,
+        "biolink:expressed_in": 15,
         "biolink:gene_associated_with_condition": 2,
         "biolink:subclass_of": 5,
-        "supporting_data_set": 17
+        "supporting_data_set": 15
       },
-      "study_results": 19
+      "study_results": 17
     },
     "validation": {
       "status": "pass",
       "n_errors": 0,
       "n_warnings": 0
+    },
+    "expression_edge_rule": {
+      "decision": "D18",
+      "levels": [
+        "majorclass",
+        "celltype"
+      ],
+      "min_pct_expressing": 0.1,
+      "min_n_cells": 20,
+      "specificity_fraction": 0.1,
+      "min_n_donors_expressing": 2,
+      "donor_support_checked": {
+        "visionkb:ds-hrca-snrna": true,
+        "visionkb:ds-rpe-scrna": true
+      }
     },
     "sources": [
       {
@@ -241,10 +256,26 @@ HTTP 200
         "infores": "infores:visionkb-heca"
       }
     ],
-    "n_files": 22,
+    "expression_edge_rule_text": "pct_expressing >= 0.1 and n_cells >= 20; pseudobulk_cp10k >= 0.1 x the gene's max in the same dataset and level; n_donors_expressing >= 2 (where donor data exist); levels majorclass, celltype only (decision D18)",
+    "known_issues": [
+      {
+        "id": "KI-1",
+        "title": "cross-lineage marker programs in cell-type groups (SYNTHETIC FIXTURE)",
+        "status": "open; report only (synthetic fixture)",
+        "n_groups": 1,
+        "n_pairs": 1,
+        "details": "validation/known_issues.json",
+        "section": "validation/report.md#known-issues",
+        "rod_program_groups": [
+          "visionkb:ds-hrca-snrna|MG"
+        ]
+      }
+    ],
+    "n_known_issue_groups": 1,
+    "n_files": 23,
     "n_datasets": 2,
     "bundle_checks": {
-      "n_files": 22,
+      "n_files": 23,
       "sizes": "ok",
       "sha256": "not_checked"
     },
@@ -379,7 +410,7 @@ HTTP 200
     },
     "degree_by_predicate": {
       "biolink:expressed_in": {
-        "out": 4,
+        "out": 3,
         "in": 0
       },
       "biolink:gene_associated_with_condition": {
@@ -724,7 +755,7 @@ HTTP 200
 
 `GET /v1/gene-sets?entity=&kind=&dataset=&min_pct=&descendants=&limit=&offset=`
 
-`kind=expressed` (default for CL / CellState): genes with `expressed_in` edges to the entity, or to its `subclass_of` descendants up to 3 hops (`descendants=false` to switch off), scored by max `pct_expressing`; with `dataset`, only StudyResults of that dataset count. The KG holds expression edges only where pct_expressing >= 0.10 and n_cells >= 20 (decision D8); lower thresholds need `/v1/atlas/expression`. `kind=disease_genes` (default for MONDO / HP): genes with `gene_associated_with_condition`, `causes`, `contributes_to`, `genetically_associated_with`, `has_phenotype` or `associated_with` edges to the entity or its descendants, scored by edge count.
+`kind=expressed` (default for CL / CellState): genes with `expressed_in` edges to the entity, or to its `subclass_of` descendants up to 3 hops (`descendants=false` to switch off), scored by max `pct_expressing`; with `dataset`, only StudyResults of that dataset count. Expression edges follow the release's `expression_edge_rule` (manifest; D18: pct_expressing >= 0.10 and n_cells >= 20, pseudobulk >= 0.10 x the gene's max in the same dataset and level, n_donors_expressing >= 2; majorclass/celltype only), quoted in a warning on every `kind=expressed` answer (older releases without the field: D8 text); the full gene x group table is `/v1/atlas/expression`. `kind=disease_genes` (default for MONDO / HP): genes with `gene_associated_with_condition`, `causes`, `contributes_to`, `genetically_associated_with`, `has_phenotype` or `associated_with` edges to the entity or its descendants, scored by edge count.
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" "$VISIONKB_API_URL/v1/gene-sets?entity=CL:0000573&kind=expressed&limit=2"
@@ -787,7 +818,7 @@ HTTP 200
       "symbol": "ABCA4",
       "name": "ATP binding cassette subfamily A member 4",
       "score": 0.61,
-      "n_edges": 3,
+      "n_edges": 2,
       "evidence": [
         {
           "max_mean_log1p_cp10k": 1.586,
@@ -812,18 +843,6 @@ HTTP 200
           "n_datasets": 1,
           "edge_id": "visionkb:e-69ee34ae7f6978ea0c0ae53ee94d7a08d124c434",
           "target": "visionkb:cs-hrca-snrna-ml-cone"
-        },
-        {
-          "max_mean_log1p_cp10k": 1.04,
-          "predicate": "biolink:expressed_in",
-          "evidence_count": 1,
-          "knowledge_level": "observation",
-          "primary_knowledge_source": "infores:visionkb-heca",
-          "target_name": "S_Cone (hrca-snrna)",
-          "max_pct_expressing": 0.4,
-          "n_datasets": 1,
-          "edge_id": "visionkb:e-5b5b2ab4ee475de939a6fbe4038e4e70ed7372e8",
-          "target": "visionkb:cs-hrca-snrna-s-cone"
         }
       ]
     }
@@ -834,7 +853,8 @@ HTTP 200
     "total": 3
   },
   "warnings": [
-    "score = max pct_expressing over supporting edges"
+    "score = max pct_expressing over supporting edges",
+    "expressed_in edges exist only where pct_expressing >= 0.1 and n_cells >= 20; pseudobulk_cp10k >= 0.1 x the gene's max in the same dataset and level; n_donors_expressing >= 2 (where donor data exist); levels majorclass, celltype only (decision D18)"
   ],
   "error": null
 }
@@ -887,10 +907,10 @@ HTTP 200
 
 `GET /v1/atlas/expression?genes=&dataset=&level=&cell_type=&sort=&limit=&offset=`
 
-Rows of `summaries/expr_summary.parquet` (§3: every gene x group, no threshold) read with DuckDB. `genes`: up to 20 gene CURIEs or symbols (case-insensitive), comma-separated or repeated; unknown names are listed in `warnings`. `level`: `majorclass` (default), `celltype`, `region_majorclass`. `cell_type`: a `cell_type_id` or a group label. `sort` (descending): `pseudobulk_cp10k` (default), `mean_log1p_cp10k`, `pct_expressing`, `n_cells`.
+Rows of `summaries/expr_summary.parquet` (§3: every gene x group, no threshold) read with DuckDB. `genes`: up to 20 gene CURIEs or symbols (case-insensitive), comma-separated or repeated; unknown names are listed in `warnings`. Rows in a group flagged by a manifest known issue (e.g. KI-1, `validation/known_issues.json`) carry `known_issues: ["KI-1"]` and one warning per issue; evidence StudyResults are tagged the same way. `level`: `majorclass` (default), `celltype`, `region_majorclass`. `cell_type`: a `cell_type_id` or a group label. `sort` (descending): `pseudobulk_cp10k` (default), `mean_log1p_cp10k`, `pct_expressing`, `n_cells`.
 
 ```bash
-curl -s -H "Authorization: Bearer $TOKEN" "$VISIONKB_API_URL/v1/atlas/expression?genes=RHO,APLN&limit=3"
+curl -s -H "Authorization: Bearer $TOKEN" "$VISIONKB_API_URL/v1/atlas/expression?genes=RLBP1&limit=3"
 ```
 
 HTTP 200
@@ -904,66 +924,71 @@ HTTP 200
       "dataset_id": "visionkb:ds-hrca-snrna",
       "atlas_version": "heca-2026.05",
       "level": "majorclass",
-      "group_label": "Rod",
-      "cell_type_id": "CL:0000604",
+      "group_label": "MG",
+      "cell_type_id": "CL:0000636",
       "region": null,
-      "gene_id": "HGNC:10012",
-      "gene_symbol": "RHO",
-      "n_cells": 4000,
+      "gene_id": "HGNC:10024",
+      "gene_symbol": "RLBP1",
+      "n_cells": 900,
       "n_donors": 4,
-      "n_expressing": 3800,
-      "pct_expressing": 0.95,
-      "mean_log1p_cp10k": 2.47,
-      "pseudobulk_cp10k": 162.45,
+      "n_expressing": 774,
+      "pct_expressing": 0.86,
+      "mean_log1p_cp10k": 2.236,
+      "pseudobulk_cp10k": 133.128,
       "n_donors_expressing": 4,
-      "var_symbol": "RHO",
+      "var_symbol": "RLBP1",
+      "dataset_version": "heca-2026.05",
+      "known_issues": [
+        "KI-1"
+      ]
+    },
+    {
+      "dataset_id": "visionkb:ds-rpe-scrna",
+      "atlas_version": "heca-2026.05",
+      "level": "majorclass",
+      "group_label": "RPE",
+      "cell_type_id": "CL:0002586",
+      "region": null,
+      "gene_id": "HGNC:10024",
+      "gene_symbol": "RLBP1",
+      "n_cells": 1200,
+      "n_donors": 3,
+      "n_expressing": 888,
+      "pct_expressing": 0.74,
+      "mean_log1p_cp10k": 1.924,
+      "pseudobulk_cp10k": 98.568,
+      "n_donors_expressing": 3,
+      "var_symbol": "RLBP1",
       "dataset_version": "heca-2026.05"
     },
     {
       "dataset_id": "visionkb:ds-hrca-snrna",
       "atlas_version": "heca-2026.05",
       "level": "majorclass",
-      "group_label": "Endo",
-      "cell_type_id": "CL:0000115",
+      "group_label": "Cone",
+      "cell_type_id": "CL:0000573",
       "region": null,
-      "gene_id": "HGNC:16665",
-      "gene_symbol": "APLN",
-      "n_cells": 15,
+      "gene_id": "HGNC:10024",
+      "gene_symbol": "RLBP1",
+      "n_cells": 600,
       "n_donors": 4,
-      "n_expressing": 5,
-      "pct_expressing": 0.333333,
-      "mean_log1p_cp10k": 0.884,
-      "pseudobulk_cp10k": 20.808,
-      "n_donors_expressing": 4,
-      "var_symbol": "APLN",
-      "dataset_version": "heca-2026.05"
-    },
-    {
-      "dataset_id": "visionkb:ds-rpe-scrna",
-      "atlas_version": "heca-2026.05",
-      "level": "majorclass",
-      "group_label": "Endo",
-      "cell_type_id": "CL:0000115",
-      "region": null,
-      "gene_id": "HGNC:16665",
-      "gene_symbol": "APLN",
-      "n_cells": 300,
-      "n_donors": 3,
-      "n_expressing": 102,
-      "pct_expressing": 0.34,
-      "mean_log1p_cp10k": 0.884,
-      "pseudobulk_cp10k": 20.808,
-      "n_donors_expressing": 3,
-      "var_symbol": "APLN",
+      "n_expressing": 0,
+      "pct_expressing": 0.0,
+      "mean_log1p_cp10k": 0.0,
+      "pseudobulk_cp10k": 0.0,
+      "n_donors_expressing": 0,
+      "var_symbol": "RLBP1",
       "dataset_version": "heca-2026.05"
     }
   ],
   "page": {
     "limit": 3,
     "offset": 0,
-    "total": 12
+    "total": 6
   },
-  "warnings": [],
+  "warnings": [
+    "KI-1 (cross-lineage marker programs in cell-type groups (SYNTHETIC FIXTURE)): 1 of 3 returned rows are in flagged groups: visionkb:ds-hrca-snrna|MG (Rod program); see /v1/release known_issues"
+  ],
   "error": null
 }
 ```
@@ -1101,32 +1126,31 @@ HTTP 200
   "kg_release": "visionkb-0000.01.0",
   "data": [
     {
-      "proposal_id": "visionkb:p-3cf599d43bba4d7fb5e0753b8ea4f1b7",
-      "created_utc": "2026-11-09T12:11:26.367831-08:00",
+      "proposal_id": "visionkb:p-46d0ac8f451c4487ad62d2f33e2fd394",
+      "created_utc": "2026-11-09T17:29:40.778559-08:00",
       "status": "proposed",
       "kg_release": "visionkb-0000.01.0",
-      "run_id": "docs-example-run",
+      "run_id": "it-832be52fe431",
       "visibility": "lab",
-      "submitted_by": "t-04579e9856f830ad",
-      "subject": "HGNC:16665",
+      "submitted_by": "t-50ea671f31c7b641",
+      "subject": "HGNC:999999",
       "predicate": "biolink:expressed_in",
       "object": "CL:0000115",
       "edge": {
         "object": "CL:0000115",
-        "subject": "HGNC:16665",
+        "subject": "HGNC:999999",
         "predicate": "biolink:expressed_in",
         "agent_type": "data_analysis_pipeline",
         "publications": [],
         "knowledge_level": "observation",
         "primary_knowledge_source": "infores:visionkb-aiscientist",
-        "species_context_qualifier": "NCBITaxon:9606",
         "anatomical_context_qualifier": "UBERON:0000966"
       },
       "evidence": [
         {
+          "note": "integration test",
           "dataset_id": "visionkb:ds-hrca-snrna",
-          "group_label": "Endo",
-          "pct_expressing": 0.33
+          "group_label": "Endo"
         }
       ],
       "review_note": null
@@ -1135,7 +1159,7 @@ HTTP 200
   "page": {
     "limit": 1,
     "offset": 0,
-    "total": 9
+    "total": 17
   },
   "warnings": [],
   "error": null

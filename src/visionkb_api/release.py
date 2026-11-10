@@ -27,7 +27,11 @@ MANIFEST_SUBSET = (
     "atlases",
     "counts",
     "validation",
+    "expression_edge_rule",
 )
+# Older releases (contracts < v0.7) have no expression_edge_rule: they were built with decision D8.
+D8_RULE = {"decision": "D8", "min_pct_expressing": 0.10, "min_n_cells": 20}
+MAX_LIST_IN_SUBSET = 50
 SOURCE_FIELDS = ("name", "version", "date", "license", "infores", "sha256")
 SUMMARIES = "summaries/expr_summary.parquet"
 REGISTRY = "registry/datasets.jsonl"
@@ -40,6 +44,54 @@ class Release:
     manifest: dict
     datasets: list[dict] = field(default_factory=list)
     checks: dict = field(default_factory=dict)
+    # (dataset_id, group_label) -> [{"id": "KI-1", "program_of": "Rod"}, ...] from manifest known_issues
+    known_issue_groups: dict[tuple[str, str], list[dict]] = field(default_factory=dict)
+
+    @property
+    def edge_rule(self) -> dict:
+        """The expression edge rule of this release (manifest ``expression_edge_rule``), else the D8 rule."""
+        rule = self.manifest.get("expression_edge_rule")
+        return rule if isinstance(rule, dict) and rule else dict(D8_RULE, fallback=True)
+
+    @property
+    def min_pct_for_edges(self) -> float:
+        return float(self.edge_rule.get("min_pct_expressing", D8_RULE["min_pct_expressing"]))
+
+    def edge_rule_text(self) -> str:
+        """One-line description of when the release has an expressed_in edge, read from the manifest."""
+        r = self.edge_rule
+        parts = []
+        if "min_pct_expressing" in r or "min_n_cells" in r:
+            a = []
+            if "min_pct_expressing" in r:
+                a.append(f"pct_expressing >= {r['min_pct_expressing']}")
+            if "min_n_cells" in r:
+                a.append(f"n_cells >= {r['min_n_cells']}")
+            parts.append(" and ".join(a))
+        if "specificity_fraction" in r:
+            parts.append(
+                f"pseudobulk_cp10k >= {r['specificity_fraction']} x the gene's max in the same dataset and level"
+            )
+        if "min_n_donors_expressing" in r:
+            parts.append(f"n_donors_expressing >= {r['min_n_donors_expressing']} (where donor data exist)")
+        text = "; ".join(parts) or "see manifest expression_edge_rule"
+        if r.get("levels"):
+            text += f"; levels {', '.join(r['levels'])} only"
+        source = f"decision {r['decision']}" if r.get("decision") else "manifest expression_edge_rule"
+        if r.get("fallback"):
+            source = "decision D8; this release's manifest has no expression_edge_rule"
+        return f"{text} ({source})"
+
+    def known_issues_for(self, dataset_id: str | None, group_label: str | None, level: str | None = None) -> list[dict]:
+        """Known issues flagging this group. Flagged groups are cell-type groups: a ``celltype`` row (or one of
+        unknown level) matches by label; a ``majorclass`` row only if the flagged group *is* that major class
+        (pair ``group_majorclass`` == label, same cells); ``region_majorclass`` rows never match."""
+        tags = self.known_issue_groups.get((dataset_id or "", group_label or ""), [])
+        if level == "region_majorclass":
+            return []
+        if level == "majorclass":
+            return [t for t in tags if t.get("group_majorclass") == group_label]
+        return tags
 
     @property
     def summaries_path(self) -> Path:
@@ -51,6 +103,13 @@ class Release:
         out["sources"] = [
             {k: s.get(k) for k in SOURCE_FIELDS if k in s} for s in self.manifest.get("sources", []) or []
         ]
+        out["expression_edge_rule_text"] = self.edge_rule_text()
+        out["known_issues"] = [
+            {k: (v[:MAX_LIST_IN_SUBSET] if isinstance(v, list) else v) for k, v in ki.items()}
+            for ki in self.manifest.get("known_issues") or []
+            if isinstance(ki, dict)
+        ]
+        out["n_known_issue_groups"] = len(self.known_issue_groups)
         out["n_files"] = len(self.manifest.get("files") or [])
         out["n_datasets"] = len(self.datasets)
         out["bundle_checks"] = self.checks
@@ -98,6 +157,57 @@ def check_files(root: Path, manifest: dict, *, verify_checksums: bool) -> dict:
     return {"n_files": len(files), "sizes": "ok", "sha256": "ok" if verify_checksums else "not_checked"}
 
 
+def _issue_records(obj) -> list[dict]:
+    if isinstance(obj, list):
+        return [o for o in obj if isinstance(o, dict)]
+    return [obj] if isinstance(obj, dict) else []
+
+
+def load_known_issue_groups(root: Path, manifest: dict) -> tuple[dict[tuple[str, str], list[dict]], list[str]]:
+    """Groups flagged by manifest ``known_issues``: from each entry's ``details`` file (``pairs`` with
+    dataset_id/group_label/program_of), else from its ``*_groups`` lists of ``dataset_id|group_label``."""
+    groups: dict[tuple[str, str], list[dict]] = {}
+    notes: list[str] = []
+
+    def add(ki_id: str, ds: str, label: str, program: str | None, majorclass: str | None = None) -> None:
+        tags = groups.setdefault((ds, label), [])
+        if not any(t["id"] == ki_id and t.get("program_of") == program for t in tags):
+            tag = {"id": ki_id}
+            if program:
+                tag["program_of"] = program
+            if majorclass:
+                tag["group_majorclass"] = majorclass
+            tags.append(tag)
+
+    for entry in manifest.get("known_issues") or []:
+        if not isinstance(entry, dict) or not entry.get("id"):
+            continue
+        ki_id, found = str(entry["id"]), False
+        details = entry.get("details")
+        if isinstance(details, str) and details.endswith(".json"):
+            try:
+                for rec in _issue_records(json.loads(_inside(root, details).read_text(encoding="utf-8"))):
+                    if rec.get("id", ki_id) != ki_id:
+                        continue
+                    for p in rec.get("pairs") or []:
+                        if p.get("dataset_id") and p.get("group_label"):
+                            add(
+                                ki_id, p["dataset_id"], p["group_label"], p.get("program_of"), p.get("group_majorclass")
+                            )
+                            found = True
+            except (OSError, ValueError, ConfigError) as exc:
+                notes.append(f"{ki_id}: details {details} not read ({exc})")
+        if not found:
+            for key, val in entry.items():
+                if key.endswith("_groups") and isinstance(val, list):
+                    program = key.removesuffix("_groups").removesuffix("_program").capitalize() or None
+                    for item in val:
+                        if isinstance(item, str) and "|" in item:
+                            ds, label = item.split("|", 1)
+                            add(ki_id, ds, label, program)
+    return groups, notes
+
+
 def load_release(path: Path | None, expected: str | None = None, *, verify_checksums: bool = False) -> Release:
     """Load and check a release bundle directory. Raises ConfigError if it is missing or inconsistent."""
     if path is None:
@@ -126,4 +236,9 @@ def load_release(path: Path | None, expected: str | None = None, *, verify_check
                 datasets.append(json.loads(line))
             except json.JSONDecodeError as exc:
                 raise ConfigError(f"{REGISTRY} line {n}: {exc}") from None
-    return Release(path=path, kg_release=rid, manifest=manifest, datasets=datasets, checks=checks)
+    ki_groups, ki_notes = load_known_issue_groups(path, manifest)
+    if ki_notes:
+        checks["known_issues"] = ki_notes
+    return Release(
+        path=path, kg_release=rid, manifest=manifest, datasets=datasets, checks=checks, known_issue_groups=ki_groups
+    )

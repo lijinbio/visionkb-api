@@ -239,12 +239,65 @@ def test_release_endpoint(client):
     assert d["biolink_version"] == "4.4.6" and d["n_datasets"] == 2
     assert d["counts"]["edges_by_predicate"]["biolink:gene_associated_with_condition"] == 2
     assert all("path_or_url" not in s for s in d["sources"])
+    assert [ki["id"] for ki in d["known_issues"]] == ["KI-1"] and d["n_known_issue_groups"] == 1
+    assert d["expression_edge_rule"]["decision"] == "D18" and "D18" in d["expression_edge_rule_text"]
+
+
+def test_edge_rule_text_from_manifest_and_fallback(release_dir, tmp_path):
+    rel = load_release(release_dir)
+    text = rel.edge_rule_text()
+    assert text == (
+        "pct_expressing >= 0.1 and n_cells >= 20; pseudobulk_cp10k >= 0.1 x the gene's max in the same dataset and "
+        "level; n_donors_expressing >= 2 (where donor data exist); levels majorclass, celltype only (decision D18)"
+    )
+    assert rel.min_pct_for_edges == 0.1
+    dst = _copy(release_dir, tmp_path)
+    m = json.loads((dst / "manifest.json").read_text())
+    del m["expression_edge_rule"]
+    (dst / "manifest.json").write_text(json.dumps(m))
+    old = load_release(dst)
+    assert old.edge_rule_text() == (
+        "pct_expressing >= 0.1 and n_cells >= 20 (decision D8; this release's manifest has no expression_edge_rule)"
+    )
+
+
+def test_known_issue_groups(release_dir, tmp_path):
+    rel = load_release(release_dir)
+    mg = {"id": "KI-1", "program_of": "Rod", "group_majorclass": "MG"}
+    assert rel.known_issue_groups == {("visionkb:ds-hrca-snrna", "MG"): [mg]}
+    ds = "visionkb:ds-hrca-snrna"
+    assert rel.known_issues_for(ds, "MG", "celltype") == [mg] and rel.known_issues_for(ds, "MG", "majorclass") == [mg]
+    assert (
+        rel.known_issues_for(ds, "MG", "region_majorclass") == []
+        and rel.known_issues_for(ds, "Rod", "majorclass") == []
+    )
+    # a flagged cell-type group whose label is also a different major class: majorclass rows are not tagged
+    rel.known_issue_groups[(ds, "Cone")] = [{"id": "KI-1", "program_of": "Rod", "group_majorclass": "PR"}]
+    assert rel.known_issues_for(ds, "Cone", "celltype") and rel.known_issues_for(ds, "Cone", "majorclass") == []
+    # details file unreadable -> fall back to the manifest's *_groups list, and say so in the bundle checks
+    dst = _copy(release_dir, tmp_path)
+    m = json.loads((dst / "manifest.json").read_text())
+    m["known_issues"][0]["details"] = "validation/missing.json"
+    (dst / "manifest.json").write_text(json.dumps(m))
+    rel2 = load_release(dst)
+    assert rel2.known_issue_groups == {("visionkb:ds-hrca-snrna", "MG"): [{"id": "KI-1", "program_of": "Rod"}]}
+    # fallback list has no group_majorclass: only cell-type (or unknown-level) rows are tagged
+    assert rel2.known_issues_for("visionkb:ds-hrca-snrna", "MG", "majorclass") == []
+    assert "validation/missing.json" in rel2.checks["known_issues"][0]
+    # no known_issues in the manifest -> nothing flagged
+    del m["known_issues"]
+    (dst / "manifest.json").write_text(json.dumps(m))
+    assert load_release(dst).known_issue_groups == {}
 
 
 def test_atlas_expression(client):
     body = ok(client.get("/v1/atlas/expression", params={"genes": "RHO,apln", "level": "majorclass"}, headers=auth()))
     assert body["page"] == {"limit": 50, "offset": 0, "total": 12}
     assert body["data"][0]["gene_symbol"] == "RHO" and body["data"][0]["group_label"] == "Rod"
+    flagged = [r for r in body["data"] if r.get("known_issues")]
+    assert {(r["gene_symbol"], r["group_label"]) for r in flagged} == {("RHO", "MG"), ("APLN", "MG")}
+    assert all(r["known_issues"] == ["KI-1"] for r in flagged)
+    assert any(w.startswith("KI-1 (") and "2 of 12 returned rows" in w for w in body["warnings"])
     body = ok(
         client.get(
             "/v1/atlas/expression",
