@@ -4,7 +4,7 @@
     "title": "VisionKB API",
     "summary": "Read-only access to a VisionKB knowledge-graph release, plus a curation queue for proposals.",
     "description": "Every response is an envelope `{status, kg_release, data, page, warnings, error}`. Lists default to 50 rows (max 200) and responses aim at 24,000 characters at most; trimmed lists are reported in `warnings`.",
-    "version": "0.1.3"
+    "version": "0.1.4"
   },
   "paths": {
     "/v1/health": {

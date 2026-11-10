@@ -66,7 +66,7 @@ HTTP 200
       "schema_version": 1
     },
     "release": "visionkb-0000.01.0",
-    "version": "0.1.3"
+    "version": "0.1.4"
   },
   "page": null,
   "warnings": [],
@@ -108,7 +108,7 @@ HTTP 200
       "schema_version": 1
     },
     "release": "visionkb-0000.01.0",
-    "version": "0.1.3"
+    "version": "0.1.4"
   },
   "page": null,
   "warnings": [],
@@ -140,7 +140,7 @@ HTTP 503
       "detail": "VISIONKB_PG_DSN_FILE is not set"
     },
     "release": "visionkb-0000.01.0",
-    "version": "0.1.3"
+    "version": "0.1.4"
   },
   "page": null,
   "warnings": [
@@ -193,7 +193,7 @@ HTTP 200
     "counts": {
       "nodes_by_category": {
         "biolink:AnatomicalEntity": 3,
-        "biolink:Cell": 8,
+        "biolink:Cell": 6,
         "biolink:Dataset": 2,
         "biolink:Disease": 3,
         "biolink:Gene": 8,
@@ -208,6 +208,28 @@ HTTP 200
         "biolink:part_of": 1,
         "biolink:subclass_of": 6,
         "supporting_data_set": 15
+      },
+      "nodes_total": 43,
+      "edges_total": 39,
+      "neo4j": {
+        "nodes": {
+          "AnatomicalEntity": 3,
+          "Cell": 6,
+          "CellState": 2,
+          "Dataset": 2,
+          "Disease": 3,
+          "Gene": 8,
+          "OrganismTaxon": 1,
+          "PhenotypicFeature": 1,
+          "StudyResult": 17
+        },
+        "relationships": {
+          "expressed_in": 15,
+          "gene_associated_with_condition": 2,
+          "part_of": 1,
+          "subclass_of": 6,
+          "supporting_data_set": 15
+        }
       },
       "study_results": 17
     },
@@ -1293,11 +1315,11 @@ HTTP 200
   "kg_release": "visionkb-0000.01.0",
   "data": [
     {
-      "proposal_id": "visionkb:p-9a040e866198432ebe59177cee51df5c",
-      "created_utc": "2026-11-09T17:51:13.565908-08:00",
+      "proposal_id": "visionkb:p-a9a384c452ba4c129f756824a37d1c66",
+      "created_utc": "2026-11-09T18:18:29.109286-08:00",
       "status": "proposed",
       "kg_release": "visionkb-0000.01.0",
-      "run_id": "it-4a4d3bfc2a20",
+      "run_id": "it-bdf5a9567297",
       "visibility": "lab",
       "submitted_by": "t-50ea671f31c7b641",
       "subject": "HGNC:999999",
@@ -1326,7 +1348,7 @@ HTTP 200
   "page": {
     "limit": 1,
     "offset": 0,
-    "total": 23
+    "total": 27
   },
   "warnings": [],
   "error": null

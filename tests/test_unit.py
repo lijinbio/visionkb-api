@@ -171,6 +171,22 @@ def test_release_detects_corruption(release_dir, tmp_path):
         load_release(dst)
 
 
+def test_fixture_counts_v07(release_dir):
+    """Contracts v0.7 §6: totals = distinct objects in neo4j-import/; categories counted once per node."""
+    import csv
+
+    m = json.loads((release_dir / "manifest.json").read_text())
+    c = m["counts"]
+    imp = release_dir / "neo4j-import"
+    n_nodes = sum(sum(1 for _ in csv.reader(p.open())) - 1 for p in imp.glob("nodes_*.csv"))
+    n_rels = sum(sum(1 for _ in csv.reader(p.open())) - 1 for p in imp.glob("rels_*.csv"))
+    assert c["nodes_total"] == n_nodes == sum(c["nodes_by_category"].values()) == sum(c["neo4j"]["nodes"].values())
+    assert (
+        c["edges_total"] == n_rels == sum(c["edges_by_predicate"].values()) == sum(c["neo4j"]["relationships"].values())
+    )
+    assert c["nodes_by_category"]["visionkb:CellState"] == 2 and c["nodes_by_category"]["biolink:Cell"] == 6
+
+
 def test_fixture_bundle(release_dir):
     tar = release_dir.parent / f"{release_dir.name}.tar"
     if not tar.exists():

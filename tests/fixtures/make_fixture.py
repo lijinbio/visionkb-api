@@ -625,14 +625,21 @@ def make(out_root: Path, release: str = RELEASE) -> Path:
     (rel / "validation/known_issues.json").write_text(json.dumps(ki, indent=1) + "\n")
     (rel / "validation/report.json").write_text(json.dumps(report, indent=1) + "\n")
     (rel / "validation/report.md").write_text(f"# Validation {release}\n\nSynthetic fixture: no checks run.\n")
+    # Contracts v0.7 §6: each node once under its most specific category (first in `category`), summing to
+    # nodes_total; edges_by_predicate sums to edges_total; plus the neo4j-admin view by label / rel type.
     counts_nodes: dict[str, int] = {}
+    neo4j_nodes: dict[str, int] = {}
     for n in nodes:
-        for c in n["category"]:
-            counts_nodes[c] = counts_nodes.get(c, 0) + 1
+        counts_nodes[n["category"][0]] = counts_nodes.get(n["category"][0], 0) + 1
+        neo4j_nodes[n["_labels"][0]] = neo4j_nodes.get(n["_labels"][0], 0) + 1
     counts_edges: dict[str, int] = {}
+    neo4j_rels: dict[str, int] = {}
     for e in edges:
         p = e.get("predicate") or "supporting_data_set"
         counts_edges[p] = counts_edges.get(p, 0) + 1
+        neo4j_rels[e["_type"]] = neo4j_rels.get(e["_type"], 0) + 1
+    assert sum(counts_nodes.values()) == len(nodes) == sum(neo4j_nodes.values())
+    assert sum(counts_edges.values()) == len(edges) == sum(neo4j_rels.values())
     files = []
     for p in sorted(rel.rglob("*")):
         if p.is_file() and p.name != "manifest.json":
@@ -661,6 +668,9 @@ def make(out_root: Path, release: str = RELEASE) -> Path:
         "counts": {
             "nodes_by_category": dict(sorted(counts_nodes.items())),
             "edges_by_predicate": dict(sorted(counts_edges.items())),
+            "nodes_total": len(nodes),
+            "edges_total": len(edges),
+            "neo4j": {"nodes": dict(sorted(neo4j_nodes.items())), "relationships": dict(sorted(neo4j_rels.items()))},
             "study_results": counts_nodes.get("biolink:StudyResult", 0),
         },
         "validation": {"status": "pass", "n_errors": 0, "n_warnings": 0},

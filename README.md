@@ -77,7 +77,7 @@ Secrets are only ever read from files, never from environment values or argument
 ## Install and run
 
 ```bash
-pip install git+https://github.com/lijinbio/visionkb-api@v0.1.3
+pip install git+https://github.com/lijinbio/visionkb-api@v0.1.4
 export VISIONKB_RELEASE_DIR=/path/to/releases/visionkb-YYYY.MM.N NEO4J_URI=bolt://127.0.0.1:7687 \
        NEO4J_PASSWORD_FILE=/path/to/secrets/neo4j_password VISIONKB_PG_DSN_FILE=/path/to/secrets/pg_dsn \
        VISIONKB_API_TOKENS_FILE=/path/to/secrets/tokens.tsv
@@ -93,8 +93,8 @@ docker run --rm -p 8770:8770 --read-only --tmpfs /tmp \
   -v /path/to/release:/release:ro -v /path/to/secrets:/run/secrets:ro \
   -e VISIONKB_API_TOKENS_FILE=/run/secrets/tokens.tsv -e NEO4J_URI=bolt://neo4j:7687 \
   -e NEO4J_PASSWORD_FILE=/run/secrets/neo4j_password -e VISIONKB_PG_DSN_FILE=/run/secrets/pg_dsn \
-  ghcr.io/lijinbio/visionkb-api:0.1.3
-apptainer pull docker://ghcr.io/lijinbio/visionkb-api:0.1.3     # HPC
+  ghcr.io/lijinbio/visionkb-api:0.1.4
+apptainer pull docker://ghcr.io/lijinbio/visionkb-api:0.1.4     # HPC
 ```
 
 The image runs as uid 10001 with a read-only root filesystem (`/tmp` is the only scratch) and has a

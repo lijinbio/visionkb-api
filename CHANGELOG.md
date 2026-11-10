@@ -5,6 +5,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); ver
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-11-09
+
+### Changed
+
+- Test fixture manifest follows contracts v0.7 §6 counts: `nodes_by_category` counts each node once under
+  its most specific category (CellState nodes no longer also under `biolink:Cell`) and sums to the new
+  `nodes_total`; `edges_by_predicate` sums to the new `edges_total`; `counts.neo4j` gives nodes per label
+  file and relationships per type, as in real releases. visionkb-deploy compares these totals with
+  neo4j-admin's import. The fixture id stays `visionkb-0000.01.0` (`visionkb-0000.01.1`/`.2` are
+  visionkb-deploy's own fixtures; nothing pins the old checksum). No service code change.
+
 ## [0.1.3] - 2026-11-09
 
 ### Changed
