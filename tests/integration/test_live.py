@@ -105,6 +105,7 @@ def test_release_predicates(client):
     assert d["predicates_in_graph"] == [
         "biolink:expressed_in",
         "biolink:gene_associated_with_condition",
+        "biolink:part_of",
         "biolink:subclass_of",
     ]
 
@@ -233,17 +234,26 @@ def test_evidence(client):
 
 
 def test_gene_sets(client):
+    # default: specificity (group pseudobulk vs the gene's max over other groups of the same dataset+level)
     b = ok(client.get("/v1/gene-sets", params={"entity": ROD}, headers=auth()))
-    assert [g["symbol"] for g in b["data"]] == ["RHO", "GNAT1", "ABCA4"]
-    assert b["data"][0]["score"] == 0.95 and b["data"][0]["evidence"][0]["edge_id"].startswith("visionkb:e-")
+    assert [g["symbol"] for g in b["data"]] == ["GNAT1", "RHO", "ABCA4"]
+    assert all(g["score_kind"] == "specificity" for g in b["data"])
+    assert b["data"][1]["best_study_result"]["other_max_group"] == "Cone"
+    assert any(w.startswith("score = specificity") for w in b["warnings"])
+    assert b["data"][0]["evidence"][0]["edge_id"].startswith("visionkb:e-")
+    # sort=pct: the v0.1.2 ranking
+    b = ok(client.get("/v1/gene-sets", params={"entity": ROD, "sort": "pct"}, headers=auth()))
+    assert [g["symbol"] for g in b["data"]] == ["RHO", "GNAT1", "ABCA4"] and b["data"][0]["score"] == 0.95
     # Cone includes its CellStates (subclass_of): ARR3 is top.
     b = ok(client.get("/v1/gene-sets", params={"entity": CONE, "kind": "expressed"}, headers=auth()))
-    assert b["data"][0]["symbol"] == "ARR3"
+    assert [g["symbol"] for g in b["data"]] == ["ARR3", "ABCA4", "RHO"]
     targets = {e["target"] for g in b["data"] for e in g["evidence"]}
     assert "visionkb:cs-hrca-snrna-s-cone" in targets
     b = ok(client.get("/v1/gene-sets", params={"entity": CONE, "descendants": "false"}, headers=auth()))
     assert {e["target"] for g in b["data"] for e in g["evidence"]} == {CONE}
     b = ok(client.get("/v1/gene-sets", params={"entity": ROD, "min_pct": 0.8}, headers=auth()))
+    assert [g["symbol"] for g in b["data"]] == ["GNAT1", "RHO"]
+    b = ok(client.get("/v1/gene-sets", params={"entity": ROD, "min_pct": 0.8, "sort": "pct"}, headers=auth()))
     assert [g["symbol"] for g in b["data"]] == ["RHO", "GNAT1"]
     b = ok(client.get("/v1/gene-sets", params={"entity": ROD, "dataset": "visionkb:ds-rpe-scrna"}, headers=auth()))
     assert b["data"] == []
@@ -265,6 +275,24 @@ def test_datasets_with_graph(client):
     b = ok(client.get("/v1/datasets", params={"entities": [APLN, "CL:0000115"]}, headers=auth()))
     assert {d["id"] for d in b["data"]} == {"visionkb:ds-hrca-snrna", "visionkb:ds-rpe-scrna"}
     assert all(d["score"] == 1.0 for d in b["data"])
+
+
+def test_datasets_tissue_expansion(client):
+    # retina: layer of retina part_of retina; pigmented layer of retina subclass_of layer of retina (OLS4)
+    b = ok(client.get("/v1/datasets", params={"tissue": "UBERON:0000966"}, headers=auth()))
+    assert {d["id"]: d["matched_tissue"] for d in b["data"]} == {
+        "visionkb:ds-hrca-snrna": ["UBERON:0000966"],
+        "visionkb:ds-rpe-scrna": ["UBERON:0001782"],
+    }
+    w = [x for x in b["warnings"] if x.startswith("tissue UBERON:0000966 expanded")]
+    assert (
+        w
+        and "part_of/subclass_of" in w[0]
+        and "to 3 UBERON terms: UBERON:0000966, UBERON:0001781, UBERON:0001782" in w[0]
+    )
+    b = ok(client.get("/v1/datasets", params={"tissue": "UBERON:0000966", "expand": "false"}, headers=auth()))
+    assert [d["id"] for d in b["data"]] == ["visionkb:ds-hrca-snrna"]
+    assert not any(x.startswith("tissue UBERON:0000966 expanded") for x in b["warnings"])
 
 
 def test_proposals_roundtrip(client):

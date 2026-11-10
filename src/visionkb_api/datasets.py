@@ -31,6 +31,7 @@ def find_datasets(
     tissue: str | None = None,
     assay: str | None = None,
     disease: str | None = None,
+    tissue_terms: set[str] | None = None,
     expressing: Callable[[str], dict[str, float]] | None = None,
     cell_states_under: Callable[[str], list[str]] | None = None,
 ) -> tuple[list[dict], list[str]]:
@@ -53,8 +54,12 @@ def find_datasets(
     for rec in records:
         if species and species not in _as_list(rec.get("species")):
             continue
-        if tissue and tissue not in _as_list(rec.get("tissue")):
-            continue
+        matched_tissue = None
+        if tissue:
+            terms = tissue_terms or {tissue}
+            matched_tissue = sorted(terms & set(_as_list(rec.get("tissue"))))
+            if not matched_tissue:
+                continue
         if assay and assay not in _as_list(rec.get("assay")):
             continue
         if disease and disease not in _as_list(rec.get("disease")):
@@ -84,6 +89,8 @@ def find_datasets(
         row["bind"] = _bind(rec)
         row["score"] = round(score, 4)
         row["matched"] = matched
+        if matched_tissue is not None:
+            row["matched_tissue"] = matched_tissue
         out.append(row)
     out.sort(key=lambda r: (-r["score"], str(r.get("id"))))
     return out, warnings

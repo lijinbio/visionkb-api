@@ -31,6 +31,7 @@ from .models import (
     Relationship,
 )
 from .proposals import STATUSES, ProposalStore
+from .ranking import SCORE_DEFINITION, rank_by_specificity
 from .release import Release, load_release
 from .summaries import LEVELS, MAX_GENES, SORTS, Summaries
 from .vocab import (
@@ -47,6 +48,7 @@ from .vocab import (
 log = logging.getLogger("visionkb_api")
 MAX_BODY_BYTES = 64 * 1024
 GENE_SET_PREFIXES = ("CL:", "visionkb:cs-", "MONDO:", "HP:")
+MAX_GENESET_CANDIDATES = 100_000
 Limit = Annotated[int, Query(ge=1, le=10_000, description="rows to return (default 50, capped at 200)")]
 Offset = Annotated[int, Query(ge=0, le=MAX_OFFSET)]
 bearer = HTTPBearer(auto_error=False, description="Token from VISIONKB_API_TOKENS_FILE")
@@ -471,6 +473,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         dataset: Annotated[str | None, Query(description="restrict expression evidence to one dataset")] = None,
         min_pct: Annotated[float | None, Query(ge=0.0, le=1.0)] = None,
         descendants: Annotated[bool, Query(description="include subclass_of descendants (up to 3 hops)")] = True,
+        sort: Annotated[
+            Literal["specificity", "pct"],
+            Query(description="kind=expressed: specificity (default) or pct (max pct_expressing, v0.1.2 behaviour)"),
+        ] = "specificity",
         limit: Limit = DEFAULT_LIMIT,
         offset: Offset = 0,
     ):
@@ -494,6 +500,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if not graph.exists([e]).get(e):
             raise ApiError(404, "not_found", f"{e} is not in {ctx.st.kg_release}")
         n = ctx.limit(limit)
+        if k == "expressed" and sort == "specificity":
+            summ = ctx.st.need_summaries()
+            cands, capped = graph.expressed_candidates(
+                entity=e, dataset=dataset, min_pct=min_pct, descendants=descendants, max_rows=MAX_GENESET_CANDIDATES
+            )
+            if capped:
+                ctx.warnings.append(
+                    f"ranking uses the first {MAX_GENESET_CANDIDATES} supporting StudyResults (by pct_expressing)"
+                )
+            top2 = summ.other_group_max(sorted({c["gene_id"] for c in cands}))
+            rows, total = rank_by_specificity(cands, top2, n, offset)
+            ctx.warnings.append(SCORE_DEFINITION)
+            ctx.warnings.append(f"expressed_in edges exist only where {rel.edge_rule_text()}")
+            return ctx.respond(rows, page={"limit": n, "offset": offset, "total": total})
         rows, total, notes = graph.gene_set(
             entity=e,
             kind=k,
@@ -505,7 +525,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         ctx.warnings += notes
         if k == "expressed":
-            ctx.warnings.append("score = max pct_expressing over supporting edges")
+            ctx.warnings.append("score = max pct_expressing over supporting edges (sort=pct)")
             ctx.warnings.append(f"expressed_in edges exist only where {rel.edge_rule_text()}")
         else:
             ctx.warnings.append("score = number of supporting gene-condition edges")
@@ -563,6 +583,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         tissue: str | None = None,
         assay: str | None = None,
         disease: str | None = None,
+        expand: Annotated[
+            bool, Query(description="tissue: also match UBERON terms that are part_of/subclass_of it (release graph)")
+        ] = True,
         limit: Limit = DEFAULT_LIMIT,
         offset: Offset = 0,
     ):
@@ -576,9 +599,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             filters[name] = _curie(val, name) if val else None
         st = ctx.st
         graph = st.graph
+        tissue_terms = None
+        if filters["tissue"] and expand:
+            if graph is None:
+                ctx.warnings.append("tissue not expanded: graph not configured")
+            else:
+                try:
+                    terms, types = graph.tissue_descendants(filters["tissue"])
+                    tissue_terms = set(terms)
+                    shown = ", ".join(terms[:25]) + (f" and {len(terms) - 25} more" if len(terms) > 25 else "")
+                    ctx.warnings.append(
+                        f"tissue {filters['tissue']} expanded via {'/'.join(types) or 'no relation types'} "
+                        f"(up to 6 hops) to {len(terms)} UBERON terms: {shown}; expand=false to match exactly"
+                    )
+                except ApiError as exc:
+                    ctx.warnings.append(f"tissue not expanded: {exc.message}")
         rows, notes = find_datasets(
             st.release.datasets,
             entities=ents,
+            tissue_terms=tissue_terms,
             expressing=(lambda g: st.summaries.datasets_expressing(g)) if st.summaries else None,
             cell_states_under=graph.cell_states_under if graph is not None else None,
             **filters,

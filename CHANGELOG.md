@@ -5,6 +5,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); ver
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-11-09
+
+### Changed
+
+- `/v1/gene-sets` `kind=expressed` ranks by specificity by default: score = (pseudobulk_cp10k of the
+  supporting group + 1) / (max pseudobulk_cp10k of the gene over the other groups of the same dataset
+  and level + 1), best StudyResult per gene, ties by pct_expressing. The pseudocount of 1 CP10k is the
+  offset of the summaries' log1p(CP10k) scale. Check on `visionkb-2026.11.0` (HRCA snRNA, Rod majorclass,
+  5477 genes meeting D18; summaries only, not the graph): by pct MALAT1 is 1st; by specificity MALAT1 is
+  5170th and PDE6A/SAG/NR2E3/RHO are 1/2/4/10. With pseudocount 0.1: MALAT1 4665th, PDE6A/SAG/NR2E3/RHO
+  1/4/5/25. With 0.01: MALAT1 4533th, PDE6A/SAG/NR2E3/RHO 6/10/7/48, and low-abundance lncRNA/clone genes
+  lead. Items carry `score_kind`, `pct_expressing`, `best_study_result` (group, pseudobulk,
+  other-group max and group) and per-edge `specificity`; the definition is in `warnings`. `sort=pct` keeps
+  the previous ranking. Other-group maxima come from a top-2 table per (dataset, level, gene) built from
+  the summaries at startup (0.5 s on the 26.8M-row `visionkb-2026.11.0` parquet).
+- `/v1/datasets` `tissue` also matches UBERON terms that are `part_of` / `subclass_of` it in the release
+  graph (up to 6 hops; `expand=false` for exact matching); the expanded term list is in `warnings` and
+  each record has `matched_tissue`.
+- Fixture: `UBERON:0001781` (layer of retina) with `UBERON:0001782 subclass_of UBERON:0001781` and
+  `UBERON:0001781 part_of UBERON:0000966` (OLS4).
+
 ## [0.1.2] - 2026-11-09
 
 ### Changed

@@ -50,6 +50,13 @@ class Summaries:
             raise ValueError(f"expr_summary.parquet lacks columns {missing}")
         self.has_var_symbol = "var_symbol" in cols
         self.n_rows = self._con.execute("SELECT count(*) FROM expr").fetchone()[0]
+        # Per (dataset, level, gene): the two highest group pseudobulk values and their groups, so the
+        # max over the *other* groups of any group is a lookup (gene-set specificity). Graph levels only.
+        self._con.execute(
+            "CREATE TABLE top2 AS SELECT dataset_id, level, gene_id, max(pseudobulk_cp10k, 2) AS pb, "
+            "arg_max(group_label, pseudobulk_cp10k, 2) AS grp FROM expr "
+            "WHERE level IN ('majorclass', 'celltype') GROUP BY ALL"
+        )
 
     def _cur(self) -> duckdb.DuckDBPyConnection:
         with self._lock:
@@ -113,6 +120,17 @@ class Summaries:
                     row[k] = round(float(row[k]), 6)
             rows.append(row)
         return rows, int(total)
+
+    def other_group_max(self, gene_ids: list[str]) -> dict[tuple[str, str, str], tuple[list[float], list[str]]]:
+        """(dataset_id, level, gene_id) -> ([top pseudobulk, second], [their group labels]) for these genes."""
+        rows = (
+            self._cur()
+            .execute(
+                "SELECT dataset_id, level, gene_id, pb, grp FROM top2 WHERE gene_id IN (SELECT unnest(?))", [gene_ids]
+            )
+            .fetchall()
+        )
+        return {(d, lv, g): (list(pb), list(grp)) for d, lv, g, pb, grp in rows}
 
     def datasets_expressing(self, gene_id: str, min_pct: float = 0.1) -> dict[str, float]:
         """dataset_id -> max pct_expressing of ``gene_id`` over groups with pct >= ``min_pct``."""

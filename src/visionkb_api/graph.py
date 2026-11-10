@@ -353,7 +353,58 @@ class Graph:
             out.append(sr)
         return out, total
 
+    def tissue_descendants(self, curie: str, max_hops: int = 6, limit: int = 2000) -> tuple[list[str], list[str]]:
+        """UBERON terms that are part_of / subclass_of ``curie`` (0..max_hops, the term itself included),
+        and the relationship types used. Only types present in the release are followed."""
+        types = [t for t in ("part_of", "subclass_of") if t in self.rel_types()]
+        if not types:
+            return [curie], []
+        hops = max(0, min(int(max_hops), 10))
+        # Fixed text: the types are constants from this module, never request values.
+        rows = self.run(
+            f"MATCH (d:NamedThing)-[:{'|'.join(types)}*0..{hops}]->(:NamedThing {{id: $id}}) "
+            "WHERE d.id STARTS WITH 'UBERON:' RETURN DISTINCT d.id AS id ORDER BY id LIMIT $limit",
+            id=curie,
+            limit=limit,
+        )
+        terms = [r["id"] for r in rows]
+        if curie not in terms:
+            terms.insert(0, curie)
+        return terms, types
+
     # -- gene sets -----------------------------------------------------------------------------
+    def expressed_candidates(
+        self, *, entity: str, dataset: str | None, min_pct: float | None, descendants: bool, max_rows: int
+    ) -> tuple[list[dict], bool]:
+        """Every (gene, expressed_in edge, StudyResult) supporting the entity (or its subclass_of descendants),
+        for ranking outside the graph. Returns rows and whether ``max_rows`` cut the list."""
+        hop = "-[:subclass_of*0..3]->" if descendants and SUBCLASS_OF in self.rel_types() else ""
+        target = (
+            f"MATCH (t:NamedThing){hop}(e:NamedThing {{id: $entity}})" if hop else "MATCH (t:NamedThing {id: $entity})"
+        )
+        conds = ["sr.edge_id = r.id"]
+        if dataset:
+            conds.append("sr.dataset_id = $dataset")
+        if min_pct is not None:
+            conds.append("sr.pct_expressing >= $min_pct")
+        rows = self.run(
+            target + " WITH DISTINCT t MATCH (g:Gene)-[r:expressed_in]->(t) WHERE " + NOT_REJECTED + " "
+            "MATCH (sr:StudyResult {edge_id: r.id}) WHERE " + " AND ".join(conds) + " "
+            "RETURN g.id AS gene_id, g.symbol AS symbol, g.name AS name, r.id AS edge_id, r.predicate AS predicate, "
+            "t.id AS target, t.name AS target_name, r.knowledge_level AS knowledge_level, "
+            "r.primary_knowledge_source AS primary_knowledge_source, r.max_pct_expressing AS max_pct_expressing, "
+            "r.max_mean_log1p_cp10k AS max_mean_log1p_cp10k, r.n_datasets AS n_datasets, "
+            "r.evidence_count AS evidence_count, sr.dataset_id AS dataset_id, sr.level AS level, "
+            "sr.group_label AS group_label, sr.pct_expressing AS pct_expressing, "
+            "sr.pseudobulk_cp10k AS pseudobulk_cp10k "
+            "ORDER BY sr.pct_expressing DESC LIMIT $cap",
+            entity=entity,
+            dataset=dataset,
+            min_pct=min_pct,
+            cap=max_rows + 1,
+        )
+        return [dict(r) for r in rows[:max_rows]], len(rows) > max_rows
+
     def gene_set(
         self,
         *,

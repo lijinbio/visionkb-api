@@ -16,6 +16,7 @@ from visionkb_api.auth import parse_tokens
 from visionkb_api.config import ConfigError, Settings, read_secret
 from visionkb_api.envelope import dumps, envelope, fit
 from visionkb_api.graph import lucene_query
+from visionkb_api.ranking import PSEUDOCOUNT, rank_by_specificity
 from visionkb_api.release import load_release
 from visionkb_api.summaries import Summaries
 from visionkb_api.vocab import is_curie, predicate_info
@@ -205,6 +206,44 @@ def test_summaries(release_dir):
     assert s.datasets_expressing("HGNC:16665") == {"visionkb:ds-hrca-snrna": 0.333333, "visionkb:ds-rpe-scrna": 0.34}
 
 
+def test_specificity_ranking(release_dir):
+    """Rod (hrca-snrna majorclass): ranking by specificity differs from pct; scores recomputed from the parquet."""
+    import duckdb
+
+    pq = str(release_dir / "summaries" / "expr_summary.parquet")
+    q = (
+        "SELECT gene_id, gene_symbol, group_label, pseudobulk_cp10k, pct_expressing FROM read_parquet(?) "
+        "WHERE dataset_id = 'visionkb:ds-hrca-snrna' AND level = 'majorclass'"
+    )
+    all_rows = duckdb.connect().execute(q, [pq]).fetchall()
+    cands = [
+        {
+            "gene_id": g,
+            "symbol": s,
+            "name": s,
+            "edge_id": f"e-{s}",
+            "target": "CL:0000604",
+            "dataset_id": "visionkb:ds-hrca-snrna",
+            "level": "majorclass",
+            "group_label": lab,
+            "pseudobulk_cp10k": pb,
+            "pct_expressing": pct,
+        }
+        for g, s, lab, pb, pct in all_rows
+        if lab == "Rod" and s in ("RHO", "GNAT1", "ABCA4")
+    ]
+    summ = Summaries(release_dir / "summaries" / "expr_summary.parquet")
+    items, total = rank_by_specificity(cands, summ.other_group_max([c["gene_id"] for c in cands]), 50, 0)
+    assert total == 3 and [i["symbol"] for i in items] == ["GNAT1", "RHO", "ABCA4"]
+    assert sorted(cands, key=lambda c: -c["pct_expressing"])[0]["symbol"] == "RHO"  # pct order differs
+    for i in items:
+        mine = {lab: pb for g, s, lab, pb, _ in all_rows if s == i["symbol"]}
+        other = max(v for lab, v in mine.items() if lab != "Rod")
+        assert i["score"] == round((mine["Rod"] + PSEUDOCOUNT) / (other + PSEUDOCOUNT), 6)
+        assert i["best_study_result"]["other_max_pseudobulk_cp10k"] == round(other, 6)
+        assert i["best_study_result"]["other_max_group"] == max((v, lab) for lab, v in mine.items() if lab != "Rod")[1]
+
+
 # -- HTTP without databases --------------------------------------------------------------------
 def test_health_without_databases(client):
     body = ok(client.get("/v1/health"))
@@ -353,6 +392,8 @@ def test_datasets(client):
     assert body["data"][0]["matched"][0]["field"] == "expression"
     body = ok(client.get("/v1/datasets", params={"assay": "EFO:0009809", "tissue": "UBERON:0000966"}, headers=auth()))
     assert [d["id"] for d in body["data"]] == ["visionkb:ds-hrca-snrna"]
+    assert body["data"][0]["matched_tissue"] == ["UBERON:0000966"]
+    assert "tissue not expanded: graph not configured" in body["warnings"]
     err(client.get("/v1/datasets", params={"entities": "not a curie"}, headers=auth()), 400, "invalid_curie")
 
 

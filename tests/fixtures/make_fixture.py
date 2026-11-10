@@ -54,6 +54,7 @@ CELL_STATES = [
 ANATOMY = [
     (RETINA, "retina", ["retina of camera-type eye"]),
     (RPE_LAYER, "pigmented layer of retina", ["RPE", "pigment epithelium of retina"]),
+    ("UBERON:0001781", "layer of retina", []),
 ]
 DISEASES = [
     ("MONDO:0013395", "retinitis pigmentosa 4", []),
@@ -66,7 +67,9 @@ SUBCLASS = [
     ("CL:0000604", "CL:0010009", "infores:cl"),
     ("CL:0000573", "CL:0010009", "infores:cl"),
     ("MONDO:0013395", "MONDO:0019200", "infores:mondo"),
+    (RPE_LAYER, "UBERON:0001781", "infores:uberon"),  # OLS4 is_a, 2026-11-09
 ]
+PART_OF = [("UBERON:0001781", RETINA, "infores:uberon")]  # OLS4 BFO:0000050 (part of), 2026-11-09
 # Gene-condition assertions with their primary references (PubMed esummary checked).
 GENE_DISEASE = [
     (
@@ -310,6 +313,8 @@ def build_graph(rows: list[dict]) -> tuple[list[dict], list[dict]]:
     state_parents = [(cid, parent, "infores:visionkb-heca") for cid, _, parent in CELL_STATES]
     for s, o, src in SUBCLASS + state_parents:
         edges.append(onto_edge(s, o, src))
+    for s, o, src in PART_OF:
+        edges.append(onto_edge(s, o, src, pred="part_of"))
 
     # Expression: one edge per (gene, cell type, tissue, species); one StudyResult per dataset group.
     tissue = {ds["id"]: ds["tissue"][0] for ds in DATASETS}

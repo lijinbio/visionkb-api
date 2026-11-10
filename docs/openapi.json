@@ -4,7 +4,7 @@
     "title": "VisionKB API",
     "summary": "Read-only access to a VisionKB knowledge-graph release, plus a curation queue for proposals.",
     "description": "Every response is an envelope `{status, kg_release, data, page, warnings, error}`. Lists default to 50 rows (max 200) and responses aim at 24,000 characters at most; trimmed lists are reported in `warnings`.",
-    "version": "0.1.2"
+    "version": "0.1.3"
   },
   "paths": {
     "/v1/health": {
@@ -557,6 +557,22 @@
             "description": "include subclass_of descendants (up to 3 hops)"
           },
           {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "specificity",
+                "pct"
+              ],
+              "type": "string",
+              "description": "kind=expressed: specificity (default) or pct (max pct_expressing, v0.1.2 behaviour)",
+              "default": "specificity",
+              "title": "Sort"
+            },
+            "description": "kind=expressed: specificity (default) or pct (max pct_expressing, v0.1.2 behaviour)"
+          },
+          {
             "name": "limit",
             "in": "query",
             "required": false,
@@ -849,6 +865,18 @@
               ],
               "title": "Disease"
             }
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "tissue: also match UBERON terms that are part_of/subclass_of it (release graph)",
+              "default": true,
+              "title": "Expand"
+            },
+            "description": "tissue: also match UBERON terms that are part_of/subclass_of it (release graph)"
           },
           {
             "name": "limit",

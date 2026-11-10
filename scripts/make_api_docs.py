@@ -126,8 +126,13 @@ SECTIONS = [
         "get_gene_set",
         "GET /v1/gene-sets?entity=&kind=&dataset=&min_pct=&descendants=&limit=&offset=",
         "`kind=expressed` (default for CL / CellState): genes with `expressed_in` edges to the entity, or to "
-        "its `subclass_of` descendants up to 3 hops (`descendants=false` to switch off), scored by max "
-        "`pct_expressing`; with `dataset`, only StudyResults of that dataset count. Expression edges follow the "
+        "its `subclass_of` descendants up to 3 hops (`descendants=false` to switch off). Default `sort=specificity`: "
+        "score = (pseudobulk_cp10k of the supporting group + 1) / (max pseudobulk_cp10k of the gene over the "
+        "OTHER groups of the same dataset and level + 1; pseudocount 1 CP10k as in log1p(CP10k)), best StudyResult per gene, ties by pct_expressing; "
+        "each item has `score_kind`, `pct_expressing` and `best_study_result` (group, its pseudobulk, the other-group "
+        "max and that group); the definition is also in `warnings`. `sort=pct` keeps the v0.1.2 ranking (max "
+        "`pct_expressing`). With `dataset`, only StudyResults of that dataset count; `min_pct` filters StudyResults. "
+        "Expression edges follow the "
         "release's `expression_edge_rule` (manifest; D18: pct_expressing >= 0.10 and n_cells >= 20, pseudobulk "
         ">= 0.10 x the gene's max in the same dataset and level, n_donors_expressing >= 2; majorclass/celltype "
         "only), quoted in a warning on every `kind=expressed` answer (older releases without the field: D8 text); "
@@ -135,7 +140,8 @@ SECTIONS = [
         "`gene_associated_with_condition`, `causes`, `contributes_to`, `genetically_associated_with`, "
         "`has_phenotype` or `associated_with` edges to the entity or its descendants, scored by edge count.",
         [
-            ("GET", "/v1/gene-sets?entity=CL:0000573&kind=expressed&limit=2", None),
+            ("GET", "/v1/gene-sets?entity=CL:0000604&kind=expressed&limit=2", None),
+            ("GET", "/v1/gene-sets?entity=CL:0000604&kind=expressed&sort=pct&limit=2", None),
             ("GET", "/v1/gene-sets?entity=MONDO:0019200", None),
         ],
     ),
@@ -157,8 +163,10 @@ SECTIONS = [
         "Registry records (§4) with `bind` (what AiScientist binds), `score` (fraction of `entities` matched) "
         "and `matched`. Entities match `cell_types` (CL ids also through their CellStates in the graph), "
         "`tissue`, `species`, `assay`, `disease`, and genes through the expression summaries (pct_expressing "
-        ">= 0.10 in some group). Filters are exact and combined with AND.",
-        [("GET", "/v1/datasets?entities=HGNC:10294", None)],
+        ">= 0.10 in some group). Filters are combined with AND; `tissue` also matches UBERON terms that are `part_of` / `subclass_of` it "
+        "in the release graph (up to 6 hops; `expand=false` for an exact match): the expanded term list is in "
+        "`warnings` and each record gets `matched_tissue`. Other filters are exact.",
+        [("GET", "/v1/datasets?entities=HGNC:10294", None), ("GET", "/v1/datasets?tissue=UBERON:0000966", None)],
     ),
     (
         "Proposals (write-back)",

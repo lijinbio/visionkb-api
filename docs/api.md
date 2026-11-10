@@ -66,7 +66,7 @@ HTTP 200
       "schema_version": 1
     },
     "release": "visionkb-0000.01.0",
-    "version": "0.1.2"
+    "version": "0.1.3"
   },
   "page": null,
   "warnings": [],
@@ -108,7 +108,7 @@ HTTP 200
       "schema_version": 1
     },
     "release": "visionkb-0000.01.0",
-    "version": "0.1.2"
+    "version": "0.1.3"
   },
   "page": null,
   "warnings": [],
@@ -140,7 +140,7 @@ HTTP 503
       "detail": "VISIONKB_PG_DSN_FILE is not set"
     },
     "release": "visionkb-0000.01.0",
-    "version": "0.1.2"
+    "version": "0.1.3"
   },
   "page": null,
   "warnings": [
@@ -192,7 +192,7 @@ HTTP 200
     ],
     "counts": {
       "nodes_by_category": {
-        "biolink:AnatomicalEntity": 2,
+        "biolink:AnatomicalEntity": 3,
         "biolink:Cell": 8,
         "biolink:Dataset": 2,
         "biolink:Disease": 3,
@@ -205,7 +205,8 @@ HTTP 200
       "edges_by_predicate": {
         "biolink:expressed_in": 15,
         "biolink:gene_associated_with_condition": 2,
-        "biolink:subclass_of": 5,
+        "biolink:part_of": 1,
+        "biolink:subclass_of": 6,
         "supporting_data_set": 15
       },
       "study_results": 17
@@ -272,16 +273,17 @@ HTTP 200
       }
     ],
     "n_known_issue_groups": 1,
-    "n_files": 23,
+    "n_files": 24,
     "n_datasets": 2,
     "bundle_checks": {
-      "n_files": 23,
+      "n_files": 24,
       "sizes": "ok",
       "sha256": "not_checked"
     },
     "predicates_in_graph": [
       "biolink:expressed_in",
       "biolink:gene_associated_with_condition",
+      "biolink:part_of",
       "biolink:subclass_of"
     ]
   },
@@ -592,7 +594,7 @@ HTTP 400
   "warnings": [],
   "error": {
     "code": "predicate_not_in_release",
-    "message": "biolink:treats is not in visionkb-0000.01.0; present: expressed_in, gene_associated_with_condition, subclass_of"
+    "message": "biolink:treats is not in visionkb-0000.01.0; present: expressed_in, gene_associated_with_condition, part_of, subclass_of"
   }
 }
 ```
@@ -755,10 +757,10 @@ HTTP 200
 
 `GET /v1/gene-sets?entity=&kind=&dataset=&min_pct=&descendants=&limit=&offset=`
 
-`kind=expressed` (default for CL / CellState): genes with `expressed_in` edges to the entity, or to its `subclass_of` descendants up to 3 hops (`descendants=false` to switch off), scored by max `pct_expressing`; with `dataset`, only StudyResults of that dataset count. Expression edges follow the release's `expression_edge_rule` (manifest; D18: pct_expressing >= 0.10 and n_cells >= 20, pseudobulk >= 0.10 x the gene's max in the same dataset and level, n_donors_expressing >= 2; majorclass/celltype only), quoted in a warning on every `kind=expressed` answer (older releases without the field: D8 text); the full gene x group table is `/v1/atlas/expression`. `kind=disease_genes` (default for MONDO / HP): genes with `gene_associated_with_condition`, `causes`, `contributes_to`, `genetically_associated_with`, `has_phenotype` or `associated_with` edges to the entity or its descendants, scored by edge count.
+`kind=expressed` (default for CL / CellState): genes with `expressed_in` edges to the entity, or to its `subclass_of` descendants up to 3 hops (`descendants=false` to switch off). Default `sort=specificity`: score = (pseudobulk_cp10k of the supporting group + 1) / (max pseudobulk_cp10k of the gene over the OTHER groups of the same dataset and level + 1; pseudocount 1 CP10k as in log1p(CP10k)), best StudyResult per gene, ties by pct_expressing; each item has `score_kind`, `pct_expressing` and `best_study_result` (group, its pseudobulk, the other-group max and that group); the definition is also in `warnings`. `sort=pct` keeps the v0.1.2 ranking (max `pct_expressing`). With `dataset`, only StudyResults of that dataset count; `min_pct` filters StudyResults. Expression edges follow the release's `expression_edge_rule` (manifest; D18: pct_expressing >= 0.10 and n_cells >= 20, pseudobulk >= 0.10 x the gene's max in the same dataset and level, n_donors_expressing >= 2; majorclass/celltype only), quoted in a warning on every `kind=expressed` answer (older releases without the field: D8 text); the full gene x group table is `/v1/atlas/expression`. `kind=disease_genes` (default for MONDO / HP): genes with `gene_associated_with_condition`, `causes`, `contributes_to`, `genetically_associated_with`, `has_phenotype` or `associated_with` edges to the entity or its descendants, scored by edge count.
 
 ```bash
-curl -s -H "Authorization: Bearer $TOKEN" "$VISIONKB_API_URL/v1/gene-sets?entity=CL:0000573&kind=expressed&limit=2"
+curl -s -H "Authorization: Bearer $TOKEN" "$VISIONKB_API_URL/v1/gene-sets?entity=CL:0000604&kind=expressed&limit=2"
 ```
 
 HTTP 200
@@ -769,80 +771,68 @@ HTTP 200
   "kg_release": "visionkb-0000.01.0",
   "data": [
     {
-      "gene_id": "HGNC:710",
-      "symbol": "ARR3",
-      "name": "arrestin 3",
-      "score": 0.92,
-      "n_edges": 3,
+      "gene_id": "HGNC:4393",
+      "symbol": "GNAT1",
+      "name": "G protein subunit alpha transducin 1",
+      "score": 89.07767,
+      "score_kind": "specificity",
+      "pct_expressing": 0.9,
+      "n_edges": 1,
+      "best_study_result": {
+        "dataset_id": "visionkb:ds-hrca-snrna",
+        "level": "majorclass",
+        "group_label": "Rod",
+        "target": "CL:0000604",
+        "pseudobulk_cp10k": 145.8,
+        "other_max_pseudobulk_cp10k": 0.648,
+        "other_max_group": "Cone"
+      },
       "evidence": [
         {
-          "max_mean_log1p_cp10k": 2.392,
+          "edge_id": "visionkb:e-cd9e1059ace4ef34a16328a3c7afe43ebaaa3ec8",
           "predicate": "biolink:expressed_in",
-          "evidence_count": 1,
+          "target": "CL:0000604",
+          "target_name": "retinal rod cell",
           "knowledge_level": "observation",
           "primary_knowledge_source": "infores:visionkb-heca",
-          "target_name": "retinal cone cell",
-          "max_pct_expressing": 0.92,
+          "max_pct_expressing": 0.9,
+          "max_mean_log1p_cp10k": 2.34,
           "n_datasets": 1,
-          "edge_id": "visionkb:e-8b5865b0b5581b4f133d5db29b6797be1692a504",
-          "target": "CL:0000573"
-        },
-        {
-          "max_mean_log1p_cp10k": 2.392,
-          "predicate": "biolink:expressed_in",
           "evidence_count": 1,
-          "knowledge_level": "observation",
-          "primary_knowledge_source": "infores:visionkb-heca",
-          "target_name": "ML_Cone (hrca-snrna)",
-          "max_pct_expressing": 0.919231,
-          "n_datasets": 1,
-          "edge_id": "visionkb:e-5d99885d79fe00953d27adfb2cb93b2539c656f9",
-          "target": "visionkb:cs-hrca-snrna-ml-cone"
-        },
-        {
-          "max_mean_log1p_cp10k": 2.08,
-          "predicate": "biolink:expressed_in",
-          "evidence_count": 1,
-          "knowledge_level": "observation",
-          "primary_knowledge_source": "infores:visionkb-heca",
-          "target_name": "S_Cone (hrca-snrna)",
-          "max_pct_expressing": 0.8,
-          "n_datasets": 1,
-          "edge_id": "visionkb:e-7d4c5cef43b1ec932a5e9828f17bcf24a5580c50",
-          "target": "visionkb:cs-hrca-snrna-s-cone"
+          "specificity": 89.07767
         }
       ]
     },
     {
-      "gene_id": "HGNC:34",
-      "symbol": "ABCA4",
-      "name": "ATP binding cassette subfamily A member 4",
-      "score": 0.61,
-      "n_edges": 2,
+      "gene_id": "HGNC:10012",
+      "symbol": "RHO",
+      "name": "rhodopsin",
+      "score": 32.366337,
+      "score_kind": "specificity",
+      "pct_expressing": 0.95,
+      "n_edges": 1,
+      "best_study_result": {
+        "dataset_id": "visionkb:ds-hrca-snrna",
+        "level": "majorclass",
+        "group_label": "Rod",
+        "target": "CL:0000604",
+        "pseudobulk_cp10k": 162.45,
+        "other_max_pseudobulk_cp10k": 4.05,
+        "other_max_group": "Cone"
+      },
       "evidence": [
         {
-          "max_mean_log1p_cp10k": 1.586,
+          "edge_id": "visionkb:e-9ae5ef6a3c1a699c1768566e5aa1900f04c27707",
           "predicate": "biolink:expressed_in",
-          "evidence_count": 1,
+          "target": "CL:0000604",
+          "target_name": "retinal rod cell",
           "knowledge_level": "observation",
           "primary_knowledge_source": "infores:visionkb-heca",
-          "target_name": "retinal cone cell",
-          "max_pct_expressing": 0.61,
+          "max_pct_expressing": 0.95,
+          "max_mean_log1p_cp10k": 2.47,
           "n_datasets": 1,
-          "edge_id": "visionkb:e-58f397ca9e8e5d4d913bd2ac2ac5796df2686dcb",
-          "target": "CL:0000573"
-        },
-        {
-          "max_mean_log1p_cp10k": 1.586,
-          "predicate": "biolink:expressed_in",
           "evidence_count": 1,
-          "knowledge_level": "observation",
-          "primary_knowledge_source": "infores:visionkb-heca",
-          "target_name": "ML_Cone (hrca-snrna)",
-          "max_pct_expressing": 0.609615,
-          "n_datasets": 1,
-          "edge_id": "visionkb:e-69ee34ae7f6978ea0c0ae53ee94d7a08d124c434",
-          "target": "visionkb:cs-hrca-snrna-ml-cone"
+          "specificity": 32.366337
         }
       ]
     }
@@ -853,7 +843,74 @@ HTTP 200
     "total": 3
   },
   "warnings": [
-    "score = max pct_expressing over supporting edges",
+    "score = specificity of the gene's best supporting StudyResult = (pseudobulk_cp10k of that group + 1) / (max pseudobulk_cp10k of the gene over the OTHER groups of the same dataset and level + 1); ties by pct_expressing; null when the dataset has no other group at that level; sort=pct for the previous ranking (max pct_expressing)",
+    "expressed_in edges exist only where pct_expressing >= 0.1 and n_cells >= 20; pseudobulk_cp10k >= 0.1 x the gene's max in the same dataset and level; n_donors_expressing >= 2 (where donor data exist); levels majorclass, celltype only (decision D18)"
+  ],
+  "error": null
+}
+```
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" "$VISIONKB_API_URL/v1/gene-sets?entity=CL:0000604&kind=expressed&sort=pct&limit=2"
+```
+
+HTTP 200
+
+```json
+{
+  "status": "ok",
+  "kg_release": "visionkb-0000.01.0",
+  "data": [
+    {
+      "gene_id": "HGNC:10012",
+      "symbol": "RHO",
+      "name": "rhodopsin",
+      "score": 0.95,
+      "n_edges": 1,
+      "evidence": [
+        {
+          "max_mean_log1p_cp10k": 2.47,
+          "predicate": "biolink:expressed_in",
+          "evidence_count": 1,
+          "knowledge_level": "observation",
+          "primary_knowledge_source": "infores:visionkb-heca",
+          "target_name": "retinal rod cell",
+          "max_pct_expressing": 0.95,
+          "n_datasets": 1,
+          "edge_id": "visionkb:e-9ae5ef6a3c1a699c1768566e5aa1900f04c27707",
+          "target": "CL:0000604"
+        }
+      ]
+    },
+    {
+      "gene_id": "HGNC:4393",
+      "symbol": "GNAT1",
+      "name": "G protein subunit alpha transducin 1",
+      "score": 0.9,
+      "n_edges": 1,
+      "evidence": [
+        {
+          "max_mean_log1p_cp10k": 2.34,
+          "predicate": "biolink:expressed_in",
+          "evidence_count": 1,
+          "knowledge_level": "observation",
+          "primary_knowledge_source": "infores:visionkb-heca",
+          "target_name": "retinal rod cell",
+          "max_pct_expressing": 0.9,
+          "n_datasets": 1,
+          "edge_id": "visionkb:e-cd9e1059ace4ef34a16328a3c7afe43ebaaa3ec8",
+          "target": "CL:0000604"
+        }
+      ]
+    }
+  ],
+  "page": {
+    "limit": 2,
+    "offset": 0,
+    "total": 3
+  },
+  "warnings": [
+    "score = max pct_expressing over supporting edges (sort=pct)",
     "expressed_in edges exist only where pct_expressing >= 0.1 and n_cells >= 20; pseudobulk_cp10k >= 0.1 x the gene's max in the same dataset and level; n_donors_expressing >= 2 (where donor data exist); levels majorclass, celltype only (decision D18)"
   ],
   "error": null
@@ -997,7 +1054,7 @@ HTTP 200
 
 `GET /v1/datasets?entities=&species=&tissue=&assay=&disease=&limit=&offset=`
 
-Registry records (§4) with `bind` (what AiScientist binds), `score` (fraction of `entities` matched) and `matched`. Entities match `cell_types` (CL ids also through their CellStates in the graph), `tissue`, `species`, `assay`, `disease`, and genes through the expression summaries (pct_expressing >= 0.10 in some group). Filters are exact and combined with AND.
+Registry records (§4) with `bind` (what AiScientist binds), `score` (fraction of `entities` matched) and `matched`. Entities match `cell_types` (CL ids also through their CellStates in the graph), `tissue`, `species`, `assay`, `disease`, and genes through the expression summaries (pct_expressing >= 0.10 in some group). Filters are combined with AND; `tissue` also matches UBERON terms that are `part_of` / `subclass_of` it in the release graph (up to 6 hops; `expand=false` for an exact match): the expanded term list is in `warnings` and each record gets `matched_tissue`. Other filters are exact.
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" "$VISIONKB_API_URL/v1/datasets?entities=HGNC:10294"
@@ -1064,6 +1121,116 @@ HTTP 200
 }
 ```
 
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" "$VISIONKB_API_URL/v1/datasets?tissue=UBERON:0000966"
+```
+
+HTTP 200
+
+```json
+{
+  "status": "ok",
+  "kg_release": "visionkb-0000.01.0",
+  "data": [
+    {
+      "access_level": "lab",
+      "assay": "EFO:0009809",
+      "bind": {
+        "name": "hrca-snrna",
+        "path": "/path/to/atlas/hrca-snrna.h5ad",
+        "role": "reference"
+      },
+      "cell_types": [
+        "CL:0000115",
+        "CL:0000573",
+        "CL:0000604",
+        "CL:0000636",
+        "visionkb:cs-hrca-snrna-ml-cone",
+        "visionkb:cs-hrca-snrna-s-cone"
+      ],
+      "checksum": null,
+      "citation": null,
+      "disease": null,
+      "format": "soma",
+      "h5ad_path": "/path/to/atlas/hrca-snrna.h5ad",
+      "id": "visionkb:ds-hrca-snrna",
+      "kg_release": "visionkb-0000.01.0",
+      "levels": [
+        "celltype",
+        "majorclass",
+        "region_majorclass"
+      ],
+      "license": "fixture",
+      "n_cells": 5515,
+      "n_donors": 4,
+      "n_samples": 4,
+      "soma_uri": "/path/to/visionkb/atlas/visionkb:ds-hrca-snrna/heca-2026.05/soma",
+      "species": "NCBITaxon:9606",
+      "stage": "adult",
+      "tissue": [
+        "UBERON:0000966"
+      ],
+      "title": "SYNTHETIC FIXTURE: retina snRNA-seq (not real data)",
+      "version": "heca-2026.05",
+      "score": 1.0,
+      "matched": [],
+      "matched_tissue": [
+        "UBERON:0000966"
+      ]
+    },
+    {
+      "access_level": "lab",
+      "assay": "EFO:0008913",
+      "bind": {
+        "name": "rpe-scrna",
+        "path": "/path/to/atlas/rpe-scrna.h5ad",
+        "role": "reference"
+      },
+      "cell_types": [
+        "CL:0000115",
+        "CL:0002586"
+      ],
+      "checksum": null,
+      "citation": null,
+      "disease": null,
+      "format": "soma",
+      "h5ad_path": "/path/to/atlas/rpe-scrna.h5ad",
+      "id": "visionkb:ds-rpe-scrna",
+      "kg_release": "visionkb-0000.01.0",
+      "levels": [
+        "majorclass"
+      ],
+      "license": "fixture",
+      "n_cells": 1500,
+      "n_donors": 3,
+      "n_samples": 3,
+      "soma_uri": "/path/to/visionkb/atlas/visionkb:ds-rpe-scrna/heca-2026.05/soma",
+      "species": "NCBITaxon:9606",
+      "stage": "adult",
+      "tissue": [
+        "UBERON:0001782"
+      ],
+      "title": "SYNTHETIC FIXTURE: RPE/choroid scRNA-seq (not real data)",
+      "version": "heca-2026.05",
+      "score": 1.0,
+      "matched": [],
+      "matched_tissue": [
+        "UBERON:0001782"
+      ]
+    }
+  ],
+  "page": {
+    "limit": 50,
+    "offset": 0,
+    "total": 2
+  },
+  "warnings": [
+    "tissue UBERON:0000966 expanded via part_of/subclass_of (up to 6 hops) to 3 UBERON terms: UBERON:0000966, UBERON:0001781, UBERON:0001782; expand=false to match exactly"
+  ],
+  "error": null
+}
+```
+
 ## Proposals (write-back)
 
 `POST /v1/proposals  |  GET /v1/proposals?status=&limit=&offset=`
@@ -1126,11 +1293,11 @@ HTTP 200
   "kg_release": "visionkb-0000.01.0",
   "data": [
     {
-      "proposal_id": "visionkb:p-46d0ac8f451c4487ad62d2f33e2fd394",
-      "created_utc": "2026-11-09T17:29:40.778559-08:00",
+      "proposal_id": "visionkb:p-9a040e866198432ebe59177cee51df5c",
+      "created_utc": "2026-11-09T17:51:13.565908-08:00",
       "status": "proposed",
       "kg_release": "visionkb-0000.01.0",
-      "run_id": "it-832be52fe431",
+      "run_id": "it-4a4d3bfc2a20",
       "visibility": "lab",
       "submitted_by": "t-50ea671f31c7b641",
       "subject": "HGNC:999999",
@@ -1159,7 +1326,7 @@ HTTP 200
   "page": {
     "limit": 1,
     "offset": 0,
-    "total": 17
+    "total": 23
   },
   "warnings": [],
   "error": null
